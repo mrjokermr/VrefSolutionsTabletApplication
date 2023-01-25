@@ -21,11 +21,10 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class LoginScreenViewModel(application: Application) : AndroidViewModel(application)  {
-    //instructor@gmail.com //kaceman569@webonoid.com second instructor account //student: garix53454@v3dev.com
-    private val _inputUsername = MutableStateFlow("kaceman569@webonoid.com")
+    private val _inputUsername = MutableStateFlow("")
     val inputUsername: StateFlow<String> = _inputUsername
 
-    private val _inputPassword = MutableStateFlow("string")
+    private val _inputPassword = MutableStateFlow("")
     val inputPassword: StateFlow<String> = _inputPassword
 
     private val _negativeFeedbackText = MutableStateFlow("")

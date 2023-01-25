@@ -138,15 +138,10 @@ fun DyanmicPopUpScreenLiveTraining(popUpScreenHandler: BasePopUpScreen, viewMode
                     RegularRectangleButton(buttonText = popUpScreenHandler.cancelText, onClick = { popUpScreenHandler.Cancel() }, modifier = Modifier.weight(1f),
                         fontSize = FontSizeStatic.Small, invertedColors = true)
 
-                    Spacer(
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(if (popUpScreenHandler.type.equals(PopUpType.EXIT_TRAINING)) 1f else 2f)
-                    )
+                    Spacer(Modifier.fillMaxWidth().weight(if (popUpScreenHandler.type.equals(PopUpType.EXIT_TRAINING)) 1f else 2f))
 
                     RegularRectangleButton(buttonText = popUpScreenHandler.confirmText, onClick = { popUpScreenHandler.Confirm() }, modifier = Modifier.weight(1f),
                         fontSize = FontSizeStatic.Small, invertedColors = false)
-
 
                 } // end row
             }

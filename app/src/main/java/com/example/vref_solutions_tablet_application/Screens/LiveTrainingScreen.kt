@@ -140,6 +140,8 @@ fun LiveTrainingScreen(viewModel: LiveTrainingViewModel = viewModel(), navContro
 
                         var forcedRecompesitionLargePlayer = viewModel.uiLargeVideoIsChanged.collectAsState()
 
+                        //forced recomposition because otherwise when SetMediaItem simulating a camera switch
+                        //the video wouldn't update...
                         if(forcedRecompesitionLargePlayer.value) {
                             ExoVideoPlayer(videoPlayer = largeVideoPlayer.value, modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(RoundedSizeStatic.Medium)).shadow(elevation = 4.dp, shape = RoundedCornerShape(RoundedSizeStatic.Medium), spotColor = Color.White, ambientColor = Color.White).zIndex(1f),
                                 context = LocalContext.current,
@@ -182,12 +184,8 @@ fun LiveTrainingScreen(viewModel: LiveTrainingViewModel = viewModel(), navContro
                                     .zIndex(4f)
                                     .fillMaxWidth()
                                     .padding(PaddingStatic.Small), horizontalArrangement = Arrangement.End) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.expand_to_fullscreen),
-                                        contentDescription = "expand_screen",
-                                        modifier = Modifier
-                                            .size(IconSizeStatic.Medium)
-                                            .zIndex(2f)
+                                    Image(painter = painterResource(id = R.drawable.expand_to_fullscreen), contentDescription = "expand_screen",
+                                        modifier = Modifier.size(IconSizeStatic.Medium).zIndex(2f)
                                             .clickable {
                                                 //make the video/livestream of the large video display as fullscreen video
                                                 viewModel.DisplayFullscreenVideoplayer(
@@ -200,6 +198,8 @@ fun LiveTrainingScreen(viewModel: LiveTrainingViewModel = viewModel(), navContro
 
                                 var forcedRecompositionSmallPlayer = viewModel.uiSmallVideoIsChanged.collectAsState() //by remember { viewModel.smallVideoIsChanged }
 
+                                //forced recomposition because otherwise when SetMediaItem simulating a camera switch
+                                //the video wouldn't update...
                                 if(forcedRecompositionSmallPlayer.value) {
                                     ExoVideoPlayer(videoPlayer = smallVideoPlayer.value, modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(RoundedSizeStatic.Medium)).zIndex(3f),
                                         context = LocalContext.current,
