@@ -61,12 +61,9 @@ fun MainMenu(viewModel: MainMenuViewModel = viewModel(), navController: NavContr
     val currentContext = LocalContext.current
     viewModel.navController = navController
 
-
     //currenttraining handler created at top level otherwise for each item a individual training handler would be created
     val currentTrainingHandler = CurrentTrainingHandler(currentContext = currentContext)
     val loggedInUserHandler: LoggedInUserHandler = LoggedInUserHandler(currentContext = currentContext)
-
-    //currentTrainingHandler.ResetCurrentTrainingInfo() //otherwise when continueing training can cause a bug that finishing the training wont do anything
 
     viewModel.viewModelScope.launch {
         viewModel.GetAllTrainingSummaries(currentContext, filterByDateAfter = true)
@@ -79,7 +76,6 @@ fun MainMenu(viewModel: MainMenuViewModel = viewModel(), navController: NavContr
         floatingActionButton = {
             if(selectedTrainingSum.value == null) NewTrainingButton(viewModel)
         } ,
-//        modifier = Modifier.padding(PaddingStatic.Small)
     ) {
         Row() {
 
@@ -90,7 +86,6 @@ fun MainMenu(viewModel: MainMenuViewModel = viewModel(), navController: NavContr
                 .fillMaxHeight()
                 .shadow(elevation = 20.dp)
                 .background(MaterialTheme.colors.onBackground),
-                //.shadow(elevation = 20.dp, ambientColor = Color.Black, spotColor = Color.Transparent)
             ) {
                 Spacer(Modifier.padding(PaddingStatic.Small))
 
@@ -211,11 +206,8 @@ fun MainMenu(viewModel: MainMenuViewModel = viewModel(), navController: NavContr
                 val currentlySelectedTrainingToView = viewModel.uiCurrentlySelectedTraining.collectAsState()
                 val allCurrentTrainingEvents = viewModel.uiAllTrainingEventsForSelectedTraining.collectAsState()
 
-
                 if(currentlySelectedTrainingToView.value == null && allCurrentTrainingEvents.value == null ) {
-
                     WelcomeMessageAndAdminButton(viewModel = viewModel, loggedInUserHandler = loggedInUserHandler)
-
                 }
                 else { //currently selected training is not null
                     //display all info from the training
@@ -262,7 +254,6 @@ fun MainMenu(viewModel: MainMenuViewModel = viewModel(), navController: NavContr
                                 }
 
                                 Spacer(Modifier.padding(PaddingStatic.Tiny))
-
 
                                 val instructorFeedbackFilterFlow = viewModel.GetInstructorFeedbackFilterFlow().collectAsState()
 
@@ -566,7 +557,6 @@ fun ExpandableTrainingEventListItem(trainingEvent: TrainingEvent, trainingSummar
                     FeedbackDetail(studentTwoName,trainingEvent.devidedFeedbackContainer.studentTwo)
                 }
 
-//                Text(text = trainingEvent.message, color = Color.White, fontSize = FontSizeStatic.Small)
             }
         }
 
@@ -620,11 +610,8 @@ fun NewTrainingButton(viewModel: MainMenuViewModel) {
 fun DisplayListItemTrainingSummary(trainingSummary: TrainingSummary, viewModel: MainMenuViewModel, currentTrainingHandler: CurrentTrainingHandler) {
     val trainingIsNotInProgress = trainingSummary.IsViewable()
 
-    var firstStudentName = ""
-    var secondStudentName = ""
-
-    if(trainingSummary.students.size > 0) firstStudentName = trainingSummary.students[0].FullName()
-    if(trainingSummary.students.size > 1) secondStudentName = trainingSummary.students[1].FullName()
+    var firstStudentName = if(trainingSummary.students.size > 0) trainingSummary.students[0].FullName() else ""
+    var secondStudentName = if(trainingSummary.students.size > 1) trainingSummary.students[1].FullName() else ""
 
     Card(modifier = Modifier.height(136.dp), elevation = 4.dp, shape = RoundedCornerShape(topEnd = 14.dp, bottomEnd = 14.dp), backgroundColor = Color(0xFF262626)) {
         Row() {
@@ -672,8 +659,6 @@ fun DisplayListItemTrainingSummary(trainingSummary: TrainingSummary, viewModel: 
 
                 Spacer(Modifier.padding(3.dp))
 
-                val iconSpace = 2.dp
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     //instructor
                     Image(
@@ -681,7 +666,7 @@ fun DisplayListItemTrainingSummary(trainingSummary: TrainingSummary, viewModel: 
                         contentDescription = "instructor_icon",
                         modifier = Modifier.size(IconSizeStatic.Small)
                     )
-                    Spacer(Modifier.padding(iconSpace))
+                    Spacer(Modifier.padding(2.dp))
                     Text(
                         text = "${trainingSummary.instructor.FullName()}",
                         color = MaterialTheme.colors.onSurface,
@@ -731,13 +716,9 @@ fun DisplayListItemTrainingSummary(trainingSummary: TrainingSummary, viewModel: 
                             }
 
                         },
-                        contentPadding = PaddingValues(4.dp),
-                        shape = RoundedCornerShape(38),
+                        contentPadding = PaddingValues(4.dp), shape = RoundedCornerShape(38),
                         colors = ButtonDefaults.buttonColors(backgroundColor = if(buttonIsActive) NegativeActionColor else MaterialTheme.colors.primaryVariant ),
-                        modifier = Modifier
-                            .width(116.dp)
-                            .height(34.dp)
-
+                        modifier = Modifier.width(116.dp).height(34.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(

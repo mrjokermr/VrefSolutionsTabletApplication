@@ -523,7 +523,8 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun DisplayFullscreenVideoplayer(targetIsLargeVideoDisplay: Boolean) {
-//        //I have disabled fullscreen functionality because HideFullScreenVideoplayer is causing memory leaks
+        //I have disabled fullscreen functionality because HideFullScreenVideoplayer is causing memory leaks for some reason
+        //while the exoplayer does have a OnDispose function and the player gets released in HideFullScreenVideoPlayer()
 //
 //        ToggleFullScreenVideoDisplay()
 //

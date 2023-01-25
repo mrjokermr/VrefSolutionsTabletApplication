@@ -294,24 +294,12 @@ fun LiveTrainingScreen(viewModel: LiveTrainingViewModel = viewModel(), navContro
                                         }
                                 )
                             }
-                            DisposableEffect(
-                                AndroidView(
-                                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(RoundedSizeStatic.Medium)).zIndex(1f),
-                                    factory = {
-                                        PlayerView(viewModel.context).apply {
-                                            player = fullScreenExoPlayer.value
-                                            useController = false
-                                            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 
-                                            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                                        }
-                                    }
-                                )
-                            ){
-                                onDispose {
-                                    if(fullScreenExoPlayer.value != null) fullScreenExoPlayer.value!!.release()
-                                }
-                            }
+                            //fullscreen videoplayer:
+                            ExoVideoPlayer(videoPlayer = fullScreenExoPlayer.value, modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(RoundedSizeStatic.Medium)).zIndex(1f),
+                                context = LocalContext.current,
+                                doubleTapAction = {}
+                            )
                         }
                     }
                 //}
@@ -482,28 +470,35 @@ fun DisplayAllTrainingEventsAndQuickFeedbackUI(viewModel: LiveTrainingViewModel,
 
 @Composable
 fun ExoVideoPlayer(videoPlayer: ExoPlayer?, modifier: Modifier, context: Context, doubleTapAction: ()-> Unit) {
-    AndroidView(
-        modifier = modifier.pointerInput(Unit) {
+    DisposableEffect(
+        AndroidView(
+            modifier = modifier.pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = {
                         doubleTapAction()
                     }
                 )
             },
-        factory = {
-            StyledPlayerView(context).apply {
-                player = videoPlayer
+            factory = {
+                StyledPlayerView(context).apply {
+                    player = videoPlayer
 
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+                    useController = false
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 
-                FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+                    FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                }
             }
-        }
+        )
     )
+    {
+        onDispose {
+            if(videoPlayer != null) videoPlayer.release()
+        }
+    }
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -1083,14 +1078,4 @@ fun FloatingActionButtonsMenu(viewModel: LiveTrainingViewModel) {
 
         }
     }
-
-
-//    Column() {
-//
-//        Row() {
-////            Button() {
-////
-////            }
-//        }
-//    }
 }
