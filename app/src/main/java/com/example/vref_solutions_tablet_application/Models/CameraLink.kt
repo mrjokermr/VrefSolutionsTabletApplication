@@ -5,6 +5,22 @@ import com.example.vref_solutions_tablet_application.R
 
 class CameraLink {
     companion object {
+        //Streamable link can become invalid, switch it up for:
+        //video urls that work but cause Exoplayer to create a small memory leak when switching cameraLinkObjects
+//        cockpit_right.mp4
+//        https://ffmpegstoragetest.blob.core.windows.net/con/Melle/cockpit_right.mp4
+//
+//        navigational_display_and_altiude.mp4
+//        https://ffmpegstoragetest.blob.core.windows.net/con/Melle/navigational_display_and_altiude.mp4
+//
+//        cockpit_middle.mp4
+//        https://ffmpegstoragetest.blob.core.windows.net/con/Melle/cockpit_middle.mp4
+//
+//        pilots_discussing.mp4
+//        https://ffmpegstoragetest.blob.core.windows.net/con/Melle/pilots_discussing.mp4
+//
+//        fly_map.mp4
+//        https://ffmpegstoragetest.blob.core.windows.net/con/Melle/fly_map.mp4
         val cockPitRight: CameraLinkObject =
             CameraLinkObject(url = "https://cdn-cf-east.streamable.com/video/mp4/f5058v.mp4?Expires=1674818100&Signature=jqatKczx~Ol-vUXGvc0W7wnLz9d0OBvdUAeyxSeefMu0x234-zAGeE5SP~SiYIUkjawdyAHj3FK4yUash39wJbHqpQxfU3jldnGh6aUoysC-TkPYG-UCuAY4yKqz5bmIi5UrH2PwG3GAs3eD9ZghI8huJRFqHY5-8azEbXP84psc-1rNXXCP4oaH6dQlCCgtO3QovbXNOFm4TfJoyeaqXMiNkIAgVJBb~71S5wjefamhtOVEct0aSXPFcc2dofink5plD4MaDW8Fh2eyysirq7rDxgVrgut9t7gX5-h7vd0OWZhqUZwKhvcWhl6IofZoXSDFlRaHM3SbOYmznLp0Mw__&Key-Pair-Id=APKAIEYUVEN4EVB2OKEQ", thumbnailDrawableId = R.drawable.thumbnail_cockpit_right,
                 videoDisplayType = VideoDisplayType.COCKPIT_RIGHT)
