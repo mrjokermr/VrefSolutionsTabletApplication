@@ -1,0 +1,7 @@
+- eigen svg voor camera switchen ontworpen en gemaakt
+
+
+
+- quality of live features implemented:
+
+    + side click on pop up screen will also close the pop up screen
