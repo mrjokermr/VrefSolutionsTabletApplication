@@ -46,14 +46,6 @@ class FeedbackEventFilterHandler {
         removePrescribedEventFeedbackFilterIsOn = !removePrescribedEventFeedbackFilterIsOn
     }
 
-//    fun ForceCloseInstructoFeedbackEventFilter() {
-//        removeInstructorFeedbackFilterIsOn.value = true
-//
-//        removeQuickInstructorFeedbackFilterIsOn = false
-//        removeManualInstructorFeedbackFilterIsOn = false
-//        removePrescribedEventFeedbackFilterIsOn = false
-//    }
-
     fun ToggleManualInstructorFeedbackFilter() {
         removeManualInstructorFeedbackFilterIsOn = !removeManualInstructorFeedbackFilterIsOn
     }

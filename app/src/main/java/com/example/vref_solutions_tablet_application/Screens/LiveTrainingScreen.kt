@@ -513,12 +513,7 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
 
         item() {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-//            .clip(RoundedCornerShape(RoundedSizeStatic.Medium))
-//            .background(MaterialTheme.colors.onBackground)
-//            .padding(PaddingStatic.Small)
-
+                modifier = Modifier.fillMaxSize()
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "Prescribed events", color = Color.Gray, fontSize = FontSizeStatic.Tiny, style = TextShadowStatic.Small())
@@ -606,9 +601,7 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
                                 style = TextShadowStatic.Small()
                             )
 
-                            AnimatedVisibility(
-                                modifier = Modifier.zIndex(18f),
-                                visible = feedbackTarget.value == FeedbackTarget.StudentOne,
+                            AnimatedVisibility(modifier = Modifier.zIndex(18f), visible = feedbackTarget.value == FeedbackTarget.StudentOne,
                                 enter = scaleIn(
                                     tween(
                                         180,
@@ -617,12 +610,7 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
                                 )
                             ) {
                                 if (feedbackTarget.value == FeedbackTarget.StudentOne) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(2.dp)
-                                            .background(MaterialTheme.colors.primary)
-                                    )
+                                    Box(modifier = Modifier.fillMaxWidth().height(2.dp).background(MaterialTheme.colors.primary))
                                 }
                             }
 
@@ -634,12 +622,8 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
                                 viewModel.SetFeedbackTarget(FeedbackTarget.StudentTwo)
                             }) {
                             Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = if (studentTwo.value != null) studentTwo.value!!.GetFirstNameAndInitialLastName() else "unknown",
-                                textAlign = TextAlign.Center,
-                                fontSize = FontSizeStatic.Tiny,
-                                color = Color.White,
-                                style = TextShadowStatic.Small()
+                                modifier = Modifier.fillMaxWidth(), text = if (studentTwo.value != null) studentTwo.value!!.GetFirstNameAndInitialLastName() else "unknown",
+                                textAlign = TextAlign.Center, fontSize = FontSizeStatic.Tiny, color = Color.White, style = TextShadowStatic.Small()
                             )
 
                             AnimatedVisibility(
@@ -654,10 +638,7 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
                             ) {
                                 if (feedbackTarget.value == FeedbackTarget.StudentTwo) {
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(2.dp)
-                                            .background(MaterialTheme.colors.primary)
+                                        modifier = Modifier.fillMaxWidth().height(2.dp).background(MaterialTheme.colors.primary)
                                     )
                                 }
                             }
@@ -667,14 +648,8 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
 
                 Spacer(Modifier.padding(PaddingStatic.Mini))
 
-                LazyRow(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(RoundedSizeStatic.Small))
-                    .background(PopUpBoxDarkBackground)
-                    .padding(PaddingStatic.Mini),
-                    verticalAlignment = Alignment.CenterVertically) {
-
+                LazyRow(modifier = Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(RoundedSizeStatic.Small)).background(PopUpBoxDarkBackground)
+                    .padding(PaddingStatic.Mini), verticalAlignment = Alignment.CenterVertically) {
                     val allPrescribedEvents = PrescribedEventsHandler.allPescribedEvents
 
                     items(allPrescribedEvents.size) {
@@ -709,9 +684,6 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
                 Spacer(Modifier.padding(PaddingStatic.Mini))
 
                 TimelineUiDisplay(viewModel = viewModel, currentTrainingHandler = currentTrainingHandler)
-
-
-
             }
         }
     }
@@ -722,9 +694,7 @@ fun PrescribedEventsAndTimelineUI(viewModel: LiveTrainingViewModel, currentTrain
 @Composable
 fun TimelineUiDisplay(viewModel: LiveTrainingViewModel, currentTrainingHandler: CurrentTrainingHandler) {
 
-    //var allTrainingEvents = viewModel.allTrainingEvents.collectAsState()
     Row() {
-        //*Per ${TimelineDisplayHandler.secondsPerBlock/60} minutes
         Text(text = "Timeline ", color = Color.Gray, fontSize = FontSizeStatic.Tiny, style = TextShadowStatic.Small())
 
         Text(text = "*Per ${TimelineDisplayHandler.secondsPerBlock/60} minutes", color = Color.Gray,modifier = Modifier.padding(bottom = 4.dp) , fontSize = FontSizeStatic.Mini, style = TextShadowStatic.Small())

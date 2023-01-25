@@ -17,10 +17,6 @@ class SwitchCamera(cameraType: PopUpType, var viewModel: LiveTrainingViewModel):
     override val cancelText: String = "Cancel"
     override val type: PopUpType = cameraType
 
-    //Waarom geen lateinit ipv var, als ik lateinit zou gebruiken krijg ik de error :
-    //lateinit property videoThatIsBeingDisplayedLinkObject has not been initialized
-    //terwijl ik deze vlak voor t aanroepen van t videoswitchcamera component door middel van de SetSelectedCameraObject methode wel set
-    //dus deze SwitchCameraPopUpComponent wordt te snel aangeroepen dus ipv een hele delay in te bouwen is de ? = null oplossing beter
     var videoThatIsBeingDisplayedLinkObject: CameraLinkObject? = null
 
     var selectedCameraObject: MutableStateFlow<CameraLinkObject> = MutableStateFlow(CameraLink.cockPitMiddle)

@@ -69,7 +69,7 @@ class CurrentTrainingHandler() {
 
     }
 
-    //Two types of Mappers because a training can be contnued from TrainingSummary data class or a new training can be started from the StartNewTraining screen which
+    //Two types of Mappers because a training can be continued from TrainingSummary data class or a new training can be started from the StartNewTraining screen which
     //works with a Training class
     private fun MapTrainingToSavableTrainingInfo(currentTraining: Training): Result<SavableTrainingInfo> = runCatching {
         SavableTrainingInfo(

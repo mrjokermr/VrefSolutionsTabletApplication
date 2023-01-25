@@ -56,7 +56,7 @@ class TimelineDisplayHandler {
                 return newTimelineEventsList
             }
             catch(e: Throwable) {
-                Log.i("BUG","error convert list")
+                Log.i("BUG","error converting list to timelineEventsList")
                 return emptyList()
             }
 

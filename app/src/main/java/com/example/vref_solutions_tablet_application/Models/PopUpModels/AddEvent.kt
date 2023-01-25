@@ -34,10 +34,6 @@ class AddEvent: BasePopUpScreen() {
 
         viewModel.viewModelScope.launch {
             viewModel.NewTrainingEvent(currentTrainingId = currentTrainingHandler.GetCurrentTrainingId(), authKey = currentTrainingHandler.GetAuthKey())
-
-            //clear previous input
-            viewModel.SetEventTitle("")
-            //viewModel.SetEventDescription("")
         }
 
     }
