@@ -1,9 +1,5 @@
-package com.example.vref_solutions_tablet_application.API
+package com.example.vref_solutions_tablet_application.api
 
-import androidx.compose.ui.unit.sp
-
-class APIBaseConfig {
-    companion object {
-        val base_url = "https://vrefsolutions-api.azurewebsites.net/api/"
-    }
+object APIBaseConfig {
+    val base_url = "https://vrefsolutions-api.azurewebsites.net/api/"
 }

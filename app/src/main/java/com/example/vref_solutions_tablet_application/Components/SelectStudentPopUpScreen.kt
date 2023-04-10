@@ -1,7 +1,6 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,39 +19,41 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import com.example.vref_solutions_tablet_application.Components.Buttons.RegularRectangleButton
-import com.example.vref_solutions_tablet_application.Components.TextField.RegularTextFieldWithPlaceholder
-import com.example.vref_solutions_tablet_application.Components.`Text-UI`.SmallAditionalInfoText
-import com.example.vref_solutions_tablet_application.Enums.UserType
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
+import com.example.vref_solutions_tablet_application.components.buttons.RegularRectangleButton
+import com.example.vref_solutions_tablet_application.components.textField.RegularTextFieldWithPlaceholder
+import com.example.vref_solutions_tablet_application.components.textUI.SmallAditionalInfoText
+import com.example.vref_solutions_tablet_application.enums.UserType
+import com.example.vref_solutions_tablet_application.handlers.LoggedInUserHandler
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.StylingClasses.*
-import com.example.vref_solutions_tablet_application.ViewModels.NewTrainingViewModel
+import com.example.vref_solutions_tablet_application.viewModels.NewTrainingViewModel
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackground
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBoxDarkBackground
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.*
+
+
+
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.TextShadowStatic
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String) {
     val loggedInUserHandler = LoggedInUserHandler(currentContext = LocalContext.current)
-    viewModel.viewModelScope.launch {
-        viewModel.LoadSearchQuerySuggestions(loggedInUserHandler)
-    }
+
+    viewModel.launchLoadSearchQuerySuggestions(loggedInUserHandler)
 
     Card(
         elevation = 12.dp, modifier = Modifier
             .width(500.dp)
             .height(520.dp)
-            .clip(RoundedCornerShape(RoundedSizeStatic.Small)),
+            .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small)),
         backgroundColor = PopUpBackground
     ) {
-        Column(modifier = Modifier.padding(PaddingStatic.Small)) {
+        Column(modifier = Modifier.padding(MaterialTheme.padding.small)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -61,18 +62,18 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
-                    text = "Add student(s)",
+                    text = stringResource(R.string.add_students),
                     color = Color(0xFFFFFFFF),
-                    fontSize = FontSizeStatic.Normal,
+                    fontSize = MaterialTheme.typography.h4.fontSize,
                     style = TextShadowStatic.Small()
                 )
                 Image(
                     painter = painterResource(id = R.drawable.x_circle_fill),
-                    contentDescription = "cross_icon",
+                    contentDescription = stringResource(R.string.cd_cross_icon),
                     modifier = Modifier
-                        .size(IconSizeStatic.Medium)
+                        .size(MaterialTheme.iconSize.medium)
                         .clickable {
-                            viewModel.TogglePopUpScreen()
+                            viewModel.togglePopUpScreen()
                         }
                 )
             }
@@ -87,19 +88,22 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
 
                     val searchQueryText = viewModel.inputSearchStudent.collectAsState()
 
-                    SmallAditionalInfoText(text = "Search student", modifier = Modifier.fillMaxWidth(), textSize = FontSizeStatic.Tiny, textAlign = TextAlign.Left,
+                    SmallAditionalInfoText(text = stringResource(R.string.search_student), modifier = Modifier.fillMaxWidth(), textSize = MaterialTheme.typography.h6.fontSize, textAlign = TextAlign.Left,
                         fontWeight = FontWeight.Normal)
 
                     Row(horizontalArrangement = Arrangement.Center, modifier = Modifier
                         .fillMaxWidth()
                     ) {
-                        RegularTextFieldWithPlaceholder(placeholderText = "firstname / lastname / e-mail",modifier = Modifier.fillMaxWidth().height(52.dp).shadow(elevation = 12.dp),
-                            value = searchQueryText, onValueChangeFun = { viewModel.SetInputAndUpdateStudentsList(input = it, authToken = authToken) }, isPasswordDisplay = false,
+                        RegularTextFieldWithPlaceholder(placeholderText = stringResource(R.string.search_query_explanation),modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .shadow(elevation = 12.dp),
+                            value = searchQueryText, onValueChangeFun = { viewModel.setInputAndUpdateStudentsList(input = it, authToken = authToken) }, isPasswordDisplay = false,
                             enabled = true)
 
                     }
 
-                    Spacer(Modifier.padding(PaddingStatic.Mini))
+                    Spacer(Modifier.padding(MaterialTheme.padding.mini))
 
                     val allInputSuggenstionsFlow = viewModel.uiSearchQuerySuggestionsList.collectAsState()
                     //Input suggestions display
@@ -110,28 +114,28 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                                 Button(
                                     modifier = Modifier
                                         .height(22.dp)
-                                        .clip(RoundedCornerShape(RoundedSizeStatic.Medium)),
+                                        .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.medium)),
                                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
                                     elevation = ButtonDefaults.elevation(10.dp),
                                     contentPadding = PaddingValues(1.dp),
-                                    onClick = { viewModel.SetInputAndUpdateStudentsList("${currentQuerySuggestion.query}",authToken = authToken) }) {
+                                    onClick = { viewModel.setInputAndUpdateStudentsList("${currentQuerySuggestion.query}",authToken = authToken) }) {
                                     Text(
-                                        modifier = Modifier.padding(start = PaddingStatic.Mini, end = PaddingStatic.Mini),
+                                        modifier = Modifier.padding(start = MaterialTheme.padding.mini, end = MaterialTheme.padding.mini),
                                         text = "${currentQuerySuggestion.query}", color = Color.Black,
-                                        fontSize = FontSizeStatic.Tiny
+                                        fontSize = MaterialTheme.typography.h6.fontSize
                                     )
                                 }
 
-                                Spacer(Modifier.padding(PaddingStatic.Mini))
+                                Spacer(Modifier.padding(MaterialTheme.padding.mini))
                             }
 
                         }
                     }
 
-                    Spacer(Modifier.padding(PaddingStatic.Tiny))
+                    Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
 
-                    SmallAditionalInfoText(text = "Search result", modifier = Modifier.fillMaxWidth(), textSize = FontSizeStatic.Tiny, textAlign = TextAlign.Left,
+                    SmallAditionalInfoText(text = stringResource(R.string.search_result), modifier = Modifier.fillMaxWidth(), textSize = MaterialTheme.typography.h6.fontSize, textAlign = TextAlign.Left,
                         fontWeight = FontWeight.Normal)
 
                     var selectedStudentOne = viewModel.uiSelectedStudentFirst.collectAsState()
@@ -144,10 +148,10 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(160.dp)
-                            .clip(RoundedCornerShape(RoundedSizeStatic.Small))
+                            .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small))
                             .shadow(elevation = 12.dp)
                             .background(PopUpBoxDarkBackground)
-                            .padding(PaddingStatic.Tiny),
+                            .padding(MaterialTheme.padding.tiny),
                     ) {
                         if(studentsSearchResult.value != null && studentsSearchResult.value!!.size > 0) {
                             items(studentsSearchResult.value!!.size) {
@@ -155,13 +159,13 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                                 //the API doesn't supply a Get students method or a parameter where I can load in only students
                                 val foundStudent = studentsSearchResult.value!![it]
                                 if(foundStudent.userType == UserType.Student) {
-                                    Text(text = foundStudent.FullName(),
+                                    Text(text = foundStudent.fullName(),
                                         color = if(foundStudent.equals(selectedStudentOne.value) || foundStudent.equals(selectedStudentTwo.value)) MaterialTheme.colors.primary else Color.White,
                                         modifier = Modifier.clickable {
-                                            viewModel.SetSelectedStudent(student = foundStudent, loggedInUserHandler = loggedInUserHandler)
+                                            viewModel.setSelectedStudent(student = foundStudent, loggedInUserHandler = loggedInUserHandler)
                                         })
 
-                                    Spacer(Modifier.padding(PaddingStatic.Mini))
+                                    Spacer(Modifier.padding(MaterialTheme.padding.mini))
                                 }
                             }
                         }
@@ -170,15 +174,15 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                                 if(studentsSearchResult.value == null) {
                                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                                         DynamicLoadingDisplay(
-                                            loadingText = "Loading students info",
-                                            iconSize = IconSizeStatic.Large,
+                                            loadingText = stringResource(R.string.loading_student_info),
+                                            iconSize = MaterialTheme.iconSize.large,
                                             iconTint = Color.White,
                                             textColor = Color.White,
                                         )
                                     }
                                 }
                                 else {
-                                    Text(text = "No students found for this input", color = Color.White, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                                    Text(text = stringResource(R.string.no_students_found_input), color = Color.White, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                                 }
 
                             }
@@ -192,33 +196,33 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                             delay(2000)
                             if(preDelayInput == searchQueryText.value && preDelayInput.length >= 3) {
                                 //cache and save the input
-                                viewModel.CacheAndSaveUserInput(input = preDelayInput.lowercase(),loggedInUserHandler = loggedInUserHandler)
+                                viewModel.cacheAndSaveUserInput(input = preDelayInput.lowercase(),loggedInUserHandler = loggedInUserHandler)
                             }
 
                         }
                     }
 
-                    Spacer(Modifier.padding(PaddingStatic.Tiny))
+                    Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
-                    SmallAditionalInfoText(text = "Currently selected student(s)", modifier = Modifier.fillMaxWidth(), textSize = FontSizeStatic.Tiny, textAlign = TextAlign.Left,
+                    SmallAditionalInfoText(text = stringResource(R.string.currently_selected_students), modifier = Modifier.fillMaxWidth(), textSize = MaterialTheme.typography.h6.fontSize, textAlign = TextAlign.Left,
                         fontWeight = FontWeight.Normal)
 
                     LazyColumn(
                         modifier = Modifier
-                            .padding(bottom = PaddingStatic.Small)
+                            .padding(bottom = MaterialTheme.padding.small)
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(RoundedSizeStatic.Small))
+                            .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small))
                             .shadow(elevation = 12.dp)
                             .background(PopUpBoxDarkBackground)
-                            .padding(PaddingStatic.Tiny)
+                            .padding(MaterialTheme.padding.tiny)
                         ,
                     ) {
                         if(selectedStudentOne.value != null) {
                             item() {
                                 Row(modifier = Modifier.clickable {
-                                    if(selectedStudentOne.value != null) viewModel.RemoveSelectedStudent(selectedStudentOne.value!!)
+                                    if(selectedStudentOne.value != null) viewModel.removeSelectedStudent(selectedStudentOne.value!!)
                                 }) {
-                                    Text(text = "${selectedStudentOne.value!!.FullName()}", color = Color.White)
+                                    Text(text = "${selectedStudentOne.value!!.fullName()}", color = Color.White)
 
                                     //Spacer(Modifier.fillMaxWidth())
 
@@ -226,30 +230,30 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                                         painter = painterResource(id = R.drawable.cancel_ico),
                                         contentDescription = "cancel_icon",
                                         modifier = Modifier
-                                            .size(IconSizeStatic.Small)
+                                            .size(MaterialTheme.iconSize.small)
                                     )
                                 }
                             }
                         }
 
                         item() {
-                            Spacer(Modifier.padding(PaddingStatic.Mini))
+                            Spacer(Modifier.padding(MaterialTheme.padding.mini))
                         }
 
                         if(selectedStudentTwo.value != null) {
                             item() {
                                 Row(modifier = Modifier.clickable {
-                                    if(selectedStudentTwo.value != null) viewModel.RemoveSelectedStudent(selectedStudentTwo.value!!)
+                                    if(selectedStudentTwo.value != null) viewModel.removeSelectedStudent(selectedStudentTwo.value!!)
                                 }) {
-                                    Text(text = "${selectedStudentTwo.value!!.FullName()}", color = Color.White)
+                                    Text(text = "${selectedStudentTwo.value!!.fullName()}", color = Color.White)
 
                                     //Spacer(Modifier.fillMaxWidth())
 
                                     Image(
                                         painter = painterResource(id = R.drawable.cancel_ico),
-                                        contentDescription = "cancel_icon",
+                                        contentDescription = stringResource(R.string.cd_cancel_icon),
                                         modifier = Modifier
-                                            .size(IconSizeStatic.Small)
+                                            .size(MaterialTheme.iconSize.small)
                                     )
                                 }
 
@@ -266,8 +270,8 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                     .weight(1f),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RegularRectangleButton(buttonText = "Cancel", onClick = { viewModel.CancelAddingStudents() }, modifier = Modifier.weight(1f),
-                    fontSize = FontSizeStatic.Small, invertedColors = true)
+                RegularRectangleButton(buttonText = stringResource(R.string.cancel), onClick = { viewModel.cancelAddingStudents() }, modifier = Modifier.weight(1f),
+                    fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = true)
 
                 Spacer(
                     Modifier
@@ -275,8 +279,8 @@ fun SelectStudentsPopUpScreen(viewModel: NewTrainingViewModel, authToken: String
                         .weight(2f)
                 )
 
-                RegularRectangleButton(buttonText = "Confirm", onClick = { viewModel.ConfirmAddingStudents() }, modifier = Modifier.weight(1f),
-                    fontSize = FontSizeStatic.Small, invertedColors = false)
+                RegularRectangleButton(buttonText = stringResource(R.string.confirm), onClick = { viewModel.confirmAddingStudents() }, modifier = Modifier.weight(1f),
+                    fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = false)
 
             } // end row
         }

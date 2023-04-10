@@ -12,17 +12,29 @@ val Typography = Typography(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
-    )
-    /* Other default text styles to override
-    button = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W500,
-        fontSize = 14.sp
     ),
-    caption = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
-    )
-    */
+    h1 = TextStyle( //largeTitle
+        fontSize = 72.sp,
+    ),
+    h2 = TextStyle( //mediumTitle
+        fontSize = 54.sp,
+    ),
+    h3 = TextStyle( //large
+        fontSize = 38.sp,
+    ),
+    h4 = TextStyle( //normal
+        fontSize = 24.sp,
+    ),
+    h5 = TextStyle( //small
+        fontSize = 18.sp,
+    ),
+    h6 = TextStyle( //tiny
+        fontSize = 14.sp,
+    ),
+    subtitle1 = TextStyle( //mini
+        fontSize = 10.sp,
+    ),
+    body2 = TextStyle( //AdminMenuButtonText
+        fontSize = 16.sp,
+    ),
 )

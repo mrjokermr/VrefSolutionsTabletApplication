@@ -1,12 +1,11 @@
-package com.example.vref_solutions_tablet_application.Handlers
+package com.example.vref_solutions_tablet_application.handlers
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.example.vref_solutions_tablet_application.Enums.TrainingStatus
-import com.example.vref_solutions_tablet_application.Models.*
+import com.example.vref_solutions_tablet_application.models.*
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import java.time.LocalDate
@@ -40,8 +39,8 @@ class CurrentTrainingHandler() {
 
 
 
-    fun SetCurrentTrainingInfo(currentTraining: Training) {
-        MapTrainingToSavableTrainingInfo(currentTraining).onSuccess {
+    fun setCurrentTrainingInfo(currentTraining: Training) {
+        mapTrainingToSavableTrainingInfo(currentTraining).onSuccess {
             //it = SavableTrainingInfo
             try {
                 val value = gson.toJson(it,object : TypeToken<SavableTrainingInfo>() {}.type)
@@ -54,8 +53,8 @@ class CurrentTrainingHandler() {
 
     }
 
-    fun SetCurrentTrainingInfo(currentTraining: TrainingSummary) {
-        MapTrainingToSavableTrainingInfo(currentTraining).onSuccess {
+    fun setCurrentTrainingInfo(currentTraining: TrainingSummary) {
+        mapTrainingToSavableTrainingInfo(currentTraining).onSuccess {
             //it = SavableTrainingInfo
             try {
                 val value = gson.toJson(it,object : TypeToken<SavableTrainingInfo>() {}.type)
@@ -71,7 +70,7 @@ class CurrentTrainingHandler() {
 
     //Two types of Mappers because a training can be continued from TrainingSummary data class or a new training can be started from the StartNewTraining screen which
     //works with a Training class
-    private fun MapTrainingToSavableTrainingInfo(currentTraining: Training): Result<SavableTrainingInfo> = runCatching {
+    private fun mapTrainingToSavableTrainingInfo(currentTraining: Training): Result<SavableTrainingInfo> = runCatching {
         SavableTrainingInfo(
             id = currentTraining.id!!,
             creationDateTime = currentTraining.creationDateTime!!,
@@ -81,7 +80,7 @@ class CurrentTrainingHandler() {
         )
     }
 
-    private fun MapTrainingToSavableTrainingInfo(currentTraining: TrainingSummary): Result<SavableTrainingInfo> = runCatching {
+    private fun mapTrainingToSavableTrainingInfo(currentTraining: TrainingSummary): Result<SavableTrainingInfo> = runCatching {
         SavableTrainingInfo(
             id = currentTraining.id!!,
             creationDateTime = currentTraining.creationDateTime!!,
@@ -91,7 +90,7 @@ class CurrentTrainingHandler() {
         )
     }
 
-    private fun GetSavedTrainingInfo(): SavableTrainingInfo? {
+    private fun getSavedTrainingInfo(): SavableTrainingInfo? {
         //val typeObject: MutableList<SearchQueryObject> = emptyList<SearchQueryObject>().toMutableList()
         try {
             val typeObject = object : TypeToken<SavableTrainingInfo>() {}.type
@@ -108,14 +107,14 @@ class CurrentTrainingHandler() {
 
     }
 
-    fun GetCurrentTrainingId(): String {
-        val savedTrainingInfo: SavableTrainingInfo? = GetSavedTrainingInfo()
+    fun getCurrentTrainingId(): String {
+        val savedTrainingInfo: SavableTrainingInfo? = getSavedTrainingInfo()
         if(savedTrainingInfo != null) return savedTrainingInfo.id.toString()
         else return ""
     }
 
-    fun GetFirstStudentId(): String {
-        val savedTrainingInfo: SavableTrainingInfo? = GetSavedTrainingInfo()
+    fun getFirstStudentId(): String {
+        val savedTrainingInfo: SavableTrainingInfo? = getSavedTrainingInfo()
         if(savedTrainingInfo != null) {
             if(savedTrainingInfo.students.size > 0) return savedTrainingInfo.students.first().id.toString()
         }
@@ -123,8 +122,8 @@ class CurrentTrainingHandler() {
         return "-1" //failed to find the first user id so return -1
     }
 
-    fun GetSecondStudentId(): String {
-        val savedTrainingInfo: SavableTrainingInfo? = GetSavedTrainingInfo()
+    fun getSecondStudentId(): String {
+        val savedTrainingInfo: SavableTrainingInfo? = getSavedTrainingInfo()
         if(savedTrainingInfo != null) {
             if(savedTrainingInfo.students.size > 1) return savedTrainingInfo.students[1].id.toString()
         }
@@ -132,9 +131,9 @@ class CurrentTrainingHandler() {
         return "-1" //failed to find the second user id so return -1
     }
 
-    fun GetCurrentTrainingCreationDate(topBarFormat: Boolean): String {
+    fun getCurrentTrainingCreationDate(topBarFormat: Boolean): String {
         try {
-            val savedTrainingInfo: SavableTrainingInfo? = GetSavedTrainingInfo()
+            val savedTrainingInfo: SavableTrainingInfo? = getSavedTrainingInfo()
             if(savedTrainingInfo != null) {
                 if(topBarFormat) return savedTrainingInfo.creationDateTime.split('T')[0].replace('-','/')
                 else return savedTrainingInfo.creationDateTime.split('T')[0]
@@ -146,9 +145,9 @@ class CurrentTrainingHandler() {
         }
     }
 
-    fun GetCurrentTrainingDateTimeAsCustomTimestamp(): CustomTimestamp {
+    fun getCurrentTrainingDateTimeAsCustomTimestamp(): CustomTimestamp {
         try {
-            val savedTrainingInfo: SavableTrainingInfo? = GetSavedTrainingInfo()
+            val savedTrainingInfo: SavableTrainingInfo? = getSavedTrainingInfo()
             if(savedTrainingInfo != null) {
                 // full date time example: 2023-01-10T09:27:26.2396399+00:00
                 val extractedTimeStamp = savedTrainingInfo.creationDateTime.split('T')[1]
@@ -170,9 +169,9 @@ class CurrentTrainingHandler() {
 
     }
 
-    fun GetCurrentTrainingDateAsDateTimeObject(): LocalDateTime {
+    fun getCurrentTrainingDateAsDateTimeObject(): LocalDateTime {
         try {
-            val savedTrainingInfo: SavableTrainingInfo? = GetSavedTrainingInfo()
+            val savedTrainingInfo: SavableTrainingInfo? = getSavedTrainingInfo()
             if(savedTrainingInfo != null) {
                 // full date time example: 2023-01-10T09:27:26.2396399+00:00
                 val extractedDate = savedTrainingInfo.creationDateTime.split('T')[0]
@@ -193,8 +192,8 @@ class CurrentTrainingHandler() {
         return LocalDateTime.now() //if everything failed return this
     }
 
-    fun GetCurrentTrainingDateTime(): String {
-        val savedTrainingInfo: SavableTrainingInfo? = GetSavedTrainingInfo()
+    fun getCurrentTrainingDateTime(): String {
+        val savedTrainingInfo: SavableTrainingInfo? = getSavedTrainingInfo()
         if(savedTrainingInfo != null) {
             //extract the readable time from the string. output will be e.x. 09:30
             var fullTime = savedTrainingInfo.creationDateTime.split('T')[1]
@@ -203,7 +202,7 @@ class CurrentTrainingHandler() {
         else return ""
     }
 
-    fun GetAuthKey(): String {
+    fun getAuthKey(): String {
         return sharedPreferences.getString("authKey", "").toString()
     }
 }

@@ -1,8 +1,9 @@
-package com.example.vref_solutions_tablet_application.Models.PopUpModels
+package com.example.vref_solutions_tablet_application.models.popUpModels
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 
+//These string variables are loaded from string.xml on creation
 class AreYouSureInfo(popUptitle: String, popUpexplanation: AnnotatedString, confirmActionText: String, cancelActionText: String, width: Dp, height: Dp,
                         isDiscardTraining: Boolean, isFinishTraining: Boolean, isDeleteUser: Boolean)
 {
@@ -15,5 +16,4 @@ class AreYouSureInfo(popUptitle: String, popUpexplanation: AnnotatedString, conf
     val isDiscardTraining = isDiscardTraining
     val isFinishTraining = isFinishTraining
     val isDeleteUser = isDeleteUser
-
 }

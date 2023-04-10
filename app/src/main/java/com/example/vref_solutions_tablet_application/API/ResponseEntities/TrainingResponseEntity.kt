@@ -1,9 +1,9 @@
-package com.example.vref_solutions_tablet_application.API.ResponseEntities
+package com.example.vref_solutions_tablet_application.api.responseEntities
 
-import com.example.vref_solutions_tablet_application.Enums.TrainingStatus
-import com.example.vref_solutions_tablet_application.Models.Altitude
-import com.example.vref_solutions_tablet_application.Models.TrainingEvent
-import com.example.vref_solutions_tablet_application.Models.User
+import com.example.vref_solutions_tablet_application.enums.TrainingStatus
+import com.example.vref_solutions_tablet_application.models.Altitude
+import com.example.vref_solutions_tablet_application.models.TrainingEvent
+import com.example.vref_solutions_tablet_application.models.User
 
 data class TrainingResponseEntity(
     val id: Long?,

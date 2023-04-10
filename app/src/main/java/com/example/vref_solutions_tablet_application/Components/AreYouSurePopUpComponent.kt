@@ -1,4 +1,4 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -9,18 +9,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.vref_solutions_tablet_application.Components.Buttons.NegativeActionButton
-import com.example.vref_solutions_tablet_application.Components.Buttons.RegularRectangleButton
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.AreYouSureInfo
+import com.example.vref_solutions_tablet_application.components.buttons.NegativeActionButton
+import com.example.vref_solutions_tablet_application.components.buttons.RegularRectangleButton
+import com.example.vref_solutions_tablet_application.models.popUpModels.AreYouSureInfo
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.StylingClasses.FontSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.IconSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.PaddingStatic
-import com.example.vref_solutions_tablet_application.ui.theme.NegativeActionColor
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackgroundDarker
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.*
+
 
 @Composable
 fun AreYouSureContainer(areYouSureInfo: AreYouSureInfo, cancelAction: ()->Unit, confirmAction: ()->Unit) {
@@ -28,24 +26,24 @@ fun AreYouSureContainer(areYouSureInfo: AreYouSureInfo, cancelAction: ()->Unit, 
         .height(areYouSureInfo.height)
         .width(areYouSureInfo.width)
         .padding(bottom = 40.dp),backgroundColor = PopUpBackgroundDarker) {
-        Column(Modifier.padding(PaddingStatic.Tiny)) {
+        Column(Modifier.padding(MaterialTheme.padding.tiny)) {
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top) {
-                Text(text = areYouSureInfo.title, color = Color.White, fontSize = FontSizeStatic.Small)
+                Text(text = areYouSureInfo.title, color = Color.White, fontSize = MaterialTheme.typography.h5.fontSize)
 
                 Image(
                     painter = painterResource(id = R.drawable.x_circle_fill),
-                    contentDescription = "cross_icon",
+                    contentDescription = stringResource(R.string.cd_cross_icon),
                     modifier = Modifier
-                        .size(IconSizeStatic.Small)
+                        .size(MaterialTheme.iconSize.small)
                         .clickable {
                             cancelAction()
                         }
                 )
             }
 
-            Spacer(Modifier.padding(PaddingStatic.Small))
+            Spacer(Modifier.padding(MaterialTheme.padding.small))
 
             Text(modifier = Modifier.fillMaxWidth(), text = areYouSureInfo.explanation, color = Color.Gray, textAlign = TextAlign.Center)
 
@@ -54,13 +52,13 @@ fun AreYouSureContainer(areYouSureInfo: AreYouSureInfo, cancelAction: ()->Unit, 
             Row(Modifier.height(30.dp)) {
 
                 RegularRectangleButton(buttonText = areYouSureInfo.cancelText, onClick = { cancelAction() }, modifier = Modifier.weight(1f),
-                    fontSize = FontSizeStatic.Small, invertedColors = true)
+                    fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = true)
 
                 Spacer(Modifier.weight(1f))
 
                 when(areYouSureInfo.isDiscardTraining) {
-                    true -> NegativeActionButton(buttonText = areYouSureInfo.confirmText, onClick = { confirmAction() }, modifier = Modifier.weight(1f), fontSize = FontSizeStatic.Tiny)
-                    false -> RegularRectangleButton(buttonText = areYouSureInfo.confirmText, onClick = { confirmAction() }, modifier = Modifier.weight(2f), fontSize = FontSizeStatic.Small, invertedColors = false)
+                    true -> NegativeActionButton(buttonText = areYouSureInfo.confirmText, onClick = { confirmAction() }, modifier = Modifier.weight(1f), fontSize = MaterialTheme.typography.h6.fontSize)
+                    false -> RegularRectangleButton(buttonText = areYouSureInfo.confirmText, onClick = { confirmAction() }, modifier = Modifier.weight(2f), fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = false)
                 }
             }
         }

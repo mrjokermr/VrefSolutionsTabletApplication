@@ -1,45 +1,27 @@
-package com.example.vref_solutions_tablet_application.ViewModels
+package com.example.vref_solutions_tablet_application.viewModels
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
-import com.example.vref_solutions_tablet_application.API.APIBaseConfig
-import com.example.vref_solutions_tablet_application.API.RequestBodies.CreateTrainingRequestBody
-import com.example.vref_solutions_tablet_application.API.TrainingApi
-import com.example.vref_solutions_tablet_application.API.UserApi
-import com.example.vref_solutions_tablet_application.Enums.TrainingStatus
-import com.example.vref_solutions_tablet_application.Handlers.CurrentTrainingHandler
-import com.example.vref_solutions_tablet_application.Handlers.FeedbackEventFilterHandler
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
-import com.example.vref_solutions_tablet_application.Mappers.TrainingMapper
-import com.example.vref_solutions_tablet_application.Mappers.UserMapper
-import com.example.vref_solutions_tablet_application.Models.DateSelectAndDisplayObject
-import com.example.vref_solutions_tablet_application.Models.TrainingEvent
-import com.example.vref_solutions_tablet_application.Models.TrainingSummary
-import com.example.vref_solutions_tablet_application.Models.User
+import com.example.vref_solutions_tablet_application.api.TrainingApi
+import com.example.vref_solutions_tablet_application.api.UserApi
+import com.example.vref_solutions_tablet_application.enums.TrainingStatus
+import com.example.vref_solutions_tablet_application.handlers.CurrentTrainingHandler
+import com.example.vref_solutions_tablet_application.handlers.FeedbackEventFilterHandler
+import com.example.vref_solutions_tablet_application.handlers.LoggedInUserHandler
+import com.example.vref_solutions_tablet_application.mappers.TrainingMapper
+import com.example.vref_solutions_tablet_application.mappers.UserMapper
+import com.example.vref_solutions_tablet_application.models.DateSelectAndDisplayObject
+import com.example.vref_solutions_tablet_application.models.TrainingEvent
+import com.example.vref_solutions_tablet_application.models.TrainingSummary
 import com.example.vref_solutions_tablet_application.ScreenNavName
-import com.example.vref_solutions_tablet_application.`API-Retrofit`.RetrofitApiHandler
+import com.example.vref_solutions_tablet_application.apiretrofit.RetrofitApiHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
-import java.time.Duration
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.time.days
 
 
 class MainMenuViewModel(application: Application) : AndroidViewModel(application)  {
@@ -62,51 +44,58 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
 
     private val feedbackEventFilterHandler = FeedbackEventFilterHandler()
 
-    private val userApi: UserApi = RetrofitApiHandler.GetUsersApi()
-    private val trainingApi: TrainingApi = RetrofitApiHandler.GetTrainingsApi()
+    private val userApi: UserApi = RetrofitApiHandler.getUsersApi()
+    private val trainingApi: TrainingApi = RetrofitApiHandler.getTrainingsApi()
 
-    fun UserIsInstructorOrHigher(context: Context): Boolean {
-        val userInfoHandler: LoggedInUserHandler = LoggedInUserHandler(currentContext = context)
+    fun userIsInstructorOrHigher(): Boolean {
+        val userInfoHandler: LoggedInUserHandler = LoggedInUserHandler(currentContext = getApplication<Application>().baseContext)
 
         var correctRights = false
 
-        correctRights = userInfoHandler.UserIsInstructor()
+        correctRights = userInfoHandler.userIsInstructor()
 
 
         return correctRights
     }
 
-    fun GetInstructorFeedbackFilterFlow(): StateFlow<Boolean> {
+    fun getInstructorFeedbackFilterFlow(): StateFlow<Boolean> {
         return feedbackEventFilterHandler.removeInstructorFeedbackFlow
     }
 
-    fun ToggleManualInstructorFeedbackFilter() {
-        feedbackEventFilterHandler.ToggleManualInstructorFeedbackFilter()
+    fun toggleManualInstructorFeedbackFilter() {
+        feedbackEventFilterHandler.toggleManualInstructorFeedbackFilter()
     }
 
-    fun ToggleQuickInstructorFeedbackFilter() {
-        feedbackEventFilterHandler.ToggleQuickInstructorFeedbackFilter()
+    fun toggleQuickInstructorFeedbackFilter() {
+        feedbackEventFilterHandler.toggleQuickInstructorFeedbackFilter()
     }
 
-    fun TogglePrescribedEventsFeedbackFilter() {
-        feedbackEventFilterHandler.TogglePrescribedEventsFeedbackFilter()
+    fun togglePrescribedEventsFeedbackFilter() {
+        feedbackEventFilterHandler.togglePrescribedEventsFeedbackFilter()
     }
 
-    fun ToggleInstructorFeedbackEventFilter() {
-        feedbackEventFilterHandler.ToggleInstructorFeedbackEventFilter()
+    fun toggleInstructorFeedbackEventFilter() {
+        feedbackEventFilterHandler.toggleInstructorFeedbackEventFilter()
     }
 
-    fun ToggleAutomaticFeedbackEventFilter() {
-        feedbackEventFilterHandler.ToggleAutomaticFeedbackEventFilter()
+    fun toggleAutomaticFeedbackEventFilter() {
+        feedbackEventFilterHandler.toggleAutomaticFeedbackEventFilter()
     }
 
-    fun UpdateCurrentEventsWithFilter(trainingId: Long, authKey: String) {
+    fun updateCurrentEventsWithFilter(trainingId: Long, authKey: String) {
         viewModelScope.launch {
-            LoadAllTrainingEvents(trainingId = trainingId, authKey = authKey)
+            loadAllTrainingEvents(trainingId = trainingId, authKey = authKey)
         }
     }
 
-    suspend fun LoadStudentName(id: Long, authKey: String): String {
+    fun launchLoadAndSetStudentNames(authKey: String,firstStudentId: Long, secondStudentId: Long, firstStudentNameFlow: MutableStateFlow<String>, secondStudentNameFlow: MutableStateFlow<String>) {
+        viewModelScope.launch {
+            loadStudentName(id = firstStudentId, authKey = authKey, studentNameFlow = firstStudentNameFlow)
+            loadStudentName(id = secondStudentId, authKey = authKey, studentNameFlow = secondStudentNameFlow)
+        }
+    }
+
+    suspend fun loadStudentName(id: Long, authKey: String, studentNameFlow: MutableStateFlow<String>) {
         try {
             //getUserById
             val result = userApi.getUserById(userId = id,authToken = authKey)
@@ -115,38 +104,44 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
             //Log.i("TEST",body?.size.toString())
 
             if(body != null && responseCode >= 200 && responseCode < 300) {
-                val mappedUser = UserMapper.Map(entity = body).getOrNull()
+                val mappedUser = UserMapper.map(entity = body).getOrNull()
                 if(mappedUser != null) {
                     //call was successful
-                    return mappedUser.FullName()
+                    studentNameFlow.value = mappedUser.fullName()
                 }
-                else return "Unknown"
+                else studentNameFlow.value = "Unknown"
 
             }
             else {
                 //call failed
-                return "Unknown"
+                studentNameFlow.value = "Unknown"
             }
         }
         catch(e: Throwable) {
-            return "Unknown - Error"
+            studentNameFlow.value = "Unknown - Error"
         }
     }
 
-    suspend fun GetAllTrainingSummaries(context: Context, filterByDateAfter: Boolean) {
-        val userInfoHandler: LoggedInUserHandler = LoggedInUserHandler(currentContext = context)
+    fun launchGetAllTrainingSummaries() {
+        viewModelScope.launch {
+            getAllTrainingSummaries(filterByDateAfter = true)
+        }
+    }
+
+    suspend fun getAllTrainingSummaries(filterByDateAfter: Boolean) {
+        val userInfoHandler: LoggedInUserHandler = LoggedInUserHandler(currentContext = getApplication<Application>().baseContext)
 
         try {
-            val result = trainingApi.GetAllTrainingInfoSummaries(authToken = userInfoHandler.GetAuthKey())
+            val result = trainingApi.getAllTrainingInfoSummaries(authToken = userInfoHandler.getAuthKey())
             val responseCode = result.raw().code
             val body = result.body()
             //Log.i("TEST",body?.size.toString())
 
             if(body != null && responseCode >= 200 && responseCode < 300) {
                 //call was successful
-                EmitAndPutUnfinishedTrainingTopOfTheList(responseList = TrainingMapper.MapListTrainingSummary(body).reversed().toMutableList()) //added reversed so that the newest date trainings are ontop
+                emitAndPutUnfinishedTrainingTopOfTheList(responseList = TrainingMapper.mapListTrainingSummary(body).reversed().toMutableList()) //added reversed so that the newest date trainings are ontop
                 if(filterByDateAfter) {
-                    DisplayTrainingByDate(context = context)
+                    displayTrainingByDate()
                 }
                 //allTrainingSummaries.emit(body)
             }
@@ -161,11 +156,11 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private suspend fun EmitAndPutUnfinishedTrainingTopOfTheList(responseList: MutableList<TrainingSummary>) {
+    private suspend fun emitAndPutUnfinishedTrainingTopOfTheList(responseList: MutableList<TrainingSummary>) {
         var continueTrainingSumList = mutableListOf<TrainingSummary>()
 
         for(trainingSum in responseList) {
-            if(!trainingSum.IsViewable()) {
+            if(!trainingSum.isViewable()) {
                 if(trainingSum.status == TrainingStatus.Processing) Log.i("Opentraining-Id",trainingSum.id.toString())
                 continueTrainingSumList.add(trainingSum)
             }
@@ -179,7 +174,7 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
         allTrainingSummaries.emit(responseList)
     }
 
-    suspend fun DisplayTrainingByDate(context: Context) {
+    suspend fun displayTrainingByDate() {
         //val allTrainingSummaries: MutableStateFlow<List<TrainingSummary>?> = MutableStateFlow(null)
         val filteredTrainingSumList: MutableList<TrainingSummary> = emptyList<TrainingSummary>().toMutableList()
 
@@ -187,7 +182,7 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
 
             for(trainingSum in this.allTrainingSummaries.value!!) {
 
-                val d = trainingSum.GetLocalDate()
+                val d = trainingSum.getLocalDate()
                 if(d.isAfter(fromDateDisplay.value.date) && (d.isBefore(toDateDisplay.value.date) || d == toDateDisplay.value.date)) {
                     filteredTrainingSumList.add(trainingSum)
                 }
@@ -195,49 +190,52 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
 
             allTrainingSummaries.emit(filteredTrainingSumList)
         }
-
-
-
     }
 
-    fun ContinueTraining(trainingSumInfo: TrainingSummary, currentTrainingHandler: CurrentTrainingHandler) {
-        currentTrainingHandler.SetCurrentTrainingInfo(currentTraining = trainingSumInfo)
+    fun continueTraining(trainingSumInfo: TrainingSummary, currentTrainingHandler: CurrentTrainingHandler) {
+        currentTrainingHandler.setCurrentTrainingInfo(currentTraining = trainingSumInfo)
 
         //check if the training is not allready finished (because some weird bug beheaviour
-        if(!trainingSumInfo.IsViewable()) {
-            NavigateToPage(ScreenNavName.LiveTraining)
+        if(!trainingSumInfo.isViewable()) {
+            navigateToPage(ScreenNavName.LiveTraining)
         }
         else {
             viewModelScope.launch {
-                GetAllTrainingSummaries(context = getApplication<Application>().baseContext, filterByDateAfter = false)
+                getAllTrainingSummaries(filterByDateAfter = false)
             }
         }
 
     }
 
-    fun ClearCurrentlySelectedTraining() {
+    fun clearCurrentlySelectedTraining() {
         currentlySelectedTraining.value = null
         //allTrainingEventsForSelectedTraining.value = null
     }
 
-    suspend fun LoadAndDisplayTrainingEvents(context: Context,selectedTrainingSum: TrainingSummary) {
-        currentlySelectedTraining.value = selectedTrainingSum
-        val currentTrainingHandler: CurrentTrainingHandler = CurrentTrainingHandler(currentContext = context)
-
-
-        LoadAllTrainingEvents(trainingId = selectedTrainingSum.id, authKey = currentTrainingHandler.GetAuthKey())
+    fun launchLoadAndDisplayTrainingEvents(selectedTrainingSum: TrainingSummary) {
+        viewModelScope.launch {
+            loadAndDisplayTrainingEvents(selectedTrainingSum = selectedTrainingSum)
+        }
     }
 
-    private suspend fun LoadAllTrainingEvents(trainingId: Long,authKey: String) {
+    suspend fun loadAndDisplayTrainingEvents(selectedTrainingSum: TrainingSummary) {
+        currentlySelectedTraining.value = selectedTrainingSum
+        val currentTrainingHandler: CurrentTrainingHandler = CurrentTrainingHandler(currentContext = getApplication<Application>().baseContext)
+
+
+        loadAllTrainingEvents(trainingId = selectedTrainingSum.id, authKey = currentTrainingHandler.getAuthKey())
+    }
+
+    private suspend fun loadAllTrainingEvents(trainingId: Long, authKey: String) {
         try {
-            val result = trainingApi.GetTrainingEvents(trainingId = trainingId, authToken = authKey)
+            val result = trainingApi.getTrainingEvents(trainingId = trainingId, authToken = authKey)
             val responseCode = result.raw().code
             val body = result.body()
 
 
             if(body != null && responseCode >= 200 && responseCode < 300) {
                 //call was succesfull
-                allTrainingEventsForSelectedTraining.emit(feedbackEventFilterHandler.FilterTrainingevents(TrainingMapper.MapListTrainingEvents(body).reversed())) //to make the new training come ontop
+                allTrainingEventsForSelectedTraining.emit(feedbackEventFilterHandler.filterTrainingevents(TrainingMapper.mapListTrainingEvents(body).reversed())) //to make the new training come ontop
             }
             else {
                 //call failed
@@ -251,14 +249,9 @@ class MainMenuViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun NavigateToPage(navigateTo: ScreenNavName) {
+    fun navigateToPage(navigateTo: ScreenNavName) {
         navController.navigate(route = navigateTo.route) {
 
         }
     }
-
-
-
-
-
 }

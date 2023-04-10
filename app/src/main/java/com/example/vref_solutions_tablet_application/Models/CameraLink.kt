@@ -1,6 +1,6 @@
-package com.example.vref_solutions_tablet_application.Models
+package com.example.vref_solutions_tablet_application.models
 
-import com.example.vref_solutions_tablet_application.Enums.VideoDisplayType
+import com.example.vref_solutions_tablet_application.enums.VideoDisplayType
 import com.example.vref_solutions_tablet_application.R
 
 class CameraLink {

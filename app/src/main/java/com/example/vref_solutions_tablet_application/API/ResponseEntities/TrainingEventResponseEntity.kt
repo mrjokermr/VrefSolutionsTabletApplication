@@ -1,6 +1,6 @@
-package com.example.vref_solutions_tablet_application.API.ResponseEntities
+package com.example.vref_solutions_tablet_application.api.responseEntities
 
-import com.example.vref_solutions_tablet_application.Models.CustomTimestamp
+import com.example.vref_solutions_tablet_application.models.CustomTimestamp
 
 data class TrainingEventResponseEntity(
     val id: Long?,

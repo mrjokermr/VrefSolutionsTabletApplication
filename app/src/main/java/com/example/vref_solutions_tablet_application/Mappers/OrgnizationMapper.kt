@@ -1,30 +1,26 @@
-package com.example.vref_solutions_tablet_application.Mappers
+package com.example.vref_solutions_tablet_application.mappers
 
-import com.example.vref_solutions_tablet_application.API.ResponseEntities.OrganizationResponseEntity
-import com.example.vref_solutions_tablet_application.API.ResponseEntities.TrainingSummaryResponseEntity
-import com.example.vref_solutions_tablet_application.Models.Organization
-import com.example.vref_solutions_tablet_application.Models.TrainingSummary
+import com.example.vref_solutions_tablet_application.api.responseEntities.OrganizationResponseEntity
+import com.example.vref_solutions_tablet_application.models.Organization
 
-class OrgnizationMapper {
+object OrgnizationMapper {
 
-    companion object {
-        fun MapList(organizationResponseEntityList: List<OrganizationResponseEntity>): List<Organization> {
-            val mappedList: MutableList<Organization> = emptyList<Organization>().toMutableList()
+    fun mapList(organizationResponseEntityList: List<OrganizationResponseEntity>): List<Organization> {
+        val mappedList: MutableList<Organization> = emptyList<Organization>().toMutableList()
 
-            for(organizationEntity in organizationResponseEntityList) {
-                Map(organizationEntity).onSuccess {
-                    mappedList.add(it)
-                }
+        for(organizationEntity in organizationResponseEntityList) {
+            map(organizationEntity).onSuccess {
+                mappedList.add(it)
             }
-
-            return mappedList
         }
 
-        fun Map(entity: OrganizationResponseEntity): Result<Organization> = runCatching {
-            Organization(
-                id = entity.id!!,
-                name = entity.name!!
-            )
-        }
+        return mappedList
+    }
+
+    fun map(entity: OrganizationResponseEntity): Result<Organization> = runCatching {
+        Organization(
+            id = entity.id!!,
+            name = entity.name!!
+        )
     }
 }

@@ -1,9 +1,8 @@
-package com.example.vref_solutions_tablet_application.Components.Buttons
+package com.example.vref_solutions_tablet_application.components.buttons
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -11,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import com.example.vref_solutions_tablet_application.StylingClasses.FontSizeStatic
 import com.example.vref_solutions_tablet_application.ui.theme.NegativeActionColor
 
 @Composable

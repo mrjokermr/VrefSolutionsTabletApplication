@@ -1,37 +1,35 @@
-package com.example.vref_solutions_tablet_application.Models.PopUpModels
+package com.example.vref_solutions_tablet_application.models.popUpModels
 
 import android.app.Application
+import androidx.annotation.StringRes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
-import com.example.vref_solutions_tablet_application.ViewModels.AdminsViewModel
-import kotlinx.coroutines.launch
+import com.example.vref_solutions_tablet_application.R
+import com.example.vref_solutions_tablet_application.enums.PopUpType
+import com.example.vref_solutions_tablet_application.handlers.LoggedInUserHandler
+import com.example.vref_solutions_tablet_application.viewModels.AdminsViewModel
 
 class NewUser(): BasePopUpScreen() {
     override val height: Dp = 382.dp
     override val width: Dp = 580.dp
-    override val title: String = "New user"
-    override val confirmText: String = "Add new user"
-    override val cancelText: String = "Cancel"
+    @StringRes
+    override val title: Int = R.string.new_user
+    @StringRes
+    override val confirmText: Int = R.string.new_user_add
+    @StringRes
+    override val cancelText: Int = R.string.cancel
     override val type: PopUpType = PopUpType.NEW_USER
 
     lateinit var viewModel: AdminsViewModel
 
-    override fun Cancel() {
-        viewModel.ToggleDynamicPopUpScreen()
+    override fun cancel() {
+        viewModel.toggleDynamicPopUpScreen()
     }
 
-    override fun Confirm() {
+    override fun confirm() {
         val context = viewModel.getApplication<Application>().baseContext
         val loggedInUserHandler = LoggedInUserHandler(currentContext = context)
 
-        viewModel.viewModelScope.launch {
-            viewModel.CreateNewUser(context = context, authKey = loggedInUserHandler.GetAuthKey())
-
-
-        }
-
+        viewModel.launchCreateNewUser(loggedInUserHandler.getAuthKey())
     }
 }

@@ -1,4 +1,4 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
@@ -7,8 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -19,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -28,15 +26,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.example.vref_solutions_tablet_application.Handlers.CurrentTrainingHandler
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.AreYouSureInfo
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.ExitTraining
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.StylingClasses.FontSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.IconSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.PaddingStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.RoundedSizeStatic
-import com.example.vref_solutions_tablet_application.ViewModels.LiveTrainingViewModel
+import com.example.vref_solutions_tablet_application.handlers.CurrentTrainingHandler
+import com.example.vref_solutions_tablet_application.models.popUpModels.AreYouSureInfo
+import com.example.vref_solutions_tablet_application.models.popUpModels.ExitTraining
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.*
+import com.example.vref_solutions_tablet_application.viewModels.LiveTrainingViewModel
 import com.example.vref_solutions_tablet_application.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -59,29 +54,36 @@ fun ExitTraingPopUpcomponent(exitTrainingHandler: ExitTraining, viewModel: LiveT
             Column() {
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontSize = FontSizeStatic.Small)) {
-                            append("Save this training as:\n\n")
+                        withStyle(style = SpanStyle(fontSize = MaterialTheme.typography.h5.fontSize)) {
+                            append("${stringResource(R.string.save_training_as)}:\n\n")
                         }
 
-                        withStyle(style = SpanStyle(fontSize = FontSizeStatic.Normal,fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)) {
-                            append("${currentTrainingHandler.GetCurrentTrainingCreationDate(topBarFormat = false)} | " +
-                                    "${currentTrainingHandler.GetCurrentTrainingDateTime()} - ${sdf.format(Date())}\n\n")
+                        withStyle(style = SpanStyle(fontSize = MaterialTheme.typography.h4.fontSize,fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)) {
+                            append("${currentTrainingHandler.getCurrentTrainingCreationDate(topBarFormat = false)} | " +
+                                    "${currentTrainingHandler.getCurrentTrainingDateTime()} - ${sdf.format(Date())}\n\n")
                         }
 
-                        withStyle(style = SpanStyle(fontSize = FontSizeStatic.Tiny,fontWeight = FontWeight.Bold)) {
-                            append("Note: After saving you will not be able to make anymore changes to the marked events. Video streams are not saved")
+                        withStyle(style = SpanStyle(fontSize = MaterialTheme.typography.h6.fontSize,fontWeight = FontWeight.Bold)) {
+                            append(stringResource(R.string.closing_training_note))
                         }
 
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    fontSize = FontSizeStatic.Small,
+                    fontSize = MaterialTheme.typography.h5.fontSize,
                     textAlign = TextAlign.Center,
                     color = Color.Gray
                 )
             }
 
-            Spacer(Modifier.padding(PaddingStatic.Small))
+            Spacer(Modifier.padding(MaterialTheme.padding.small))
 
+            val saveAndFinishTrainingText = stringResource(R.string.save_and_finish_training)
+            val areYouSureYouWantToText = stringResource(R.string.are_you_sure_you_want_to)
+            val finishText = stringResource(R.string.finish)
+            val thisTrainingText = stringResource(R.string.this_training)
+            val markedTrainingEventsWarningText = stringResource(R.string.marked_training_events_warning)
+            val cancelText = stringResource(R.string.cancel)
+            val finishTrainingText = stringResource(R.string.finish_training)
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -89,30 +91,28 @@ fun ExitTraingPopUpcomponent(exitTrainingHandler: ExitTraining, viewModel: LiveT
                 MenuButton(
                     backgroundColor = MaterialTheme.colors.primary,
                     textColor = Color.White,
-                    buttonText = "Save & Finish training",
+                    buttonText = saveAndFinishTrainingText,
                     buttonAction = {
-
-
-                        exitTrainingHandler.SetAndDisplayAreYouSurePopUp(
+                        exitTrainingHandler.setAndDisplayAreYouSurePopUp(
                             infoClass = AreYouSureInfo(
-                                popUptitle = "Save & finish training",
+                                popUptitle = saveAndFinishTrainingText,
                                 popUpexplanation =
                                 buildAnnotatedString {
-                                    append("Are you sure you want to ")
+                                    append(areYouSureYouWantToText)
                                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                         append(
-                                            "finish "
+                                            "$finishText "
                                         )
                                     }
-                                    append("this training?\n\n")
+                                    append("$thisTrainingText?\n\n")
 
                                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append("All marked event can’t be changed after finishing the training.")
+                                        append("$markedTrainingEventsWarningText.")
                                     }
 
                                 },
-                                confirmActionText = "Finish training",
-                                cancelActionText = "Cancel",
+                                confirmActionText = finishTrainingText,
+                                cancelActionText = cancelText,
                                 width = 420.dp,
                                 height = 250.dp,
                                 isDiscardTraining = false,
@@ -123,31 +123,35 @@ fun ExitTraingPopUpcomponent(exitTrainingHandler: ExitTraining, viewModel: LiveT
                     }
                 )
 
-                Spacer(Modifier.padding(PaddingStatic.Tiny))
+                Spacer(Modifier.padding(MaterialTheme.padding.tiny))
+
+                val leaveTrainingText = stringResource(R.string.leave_training)
+                val stillAccessTrainingTipText = stringResource(R.string.still_access_training_tip)
+                val beAwareFinishTrainingTipText = stringResource(R.string.be_aware_finish_training_tip)
 
                 MenuButton(
                     backgroundColor = MaterialTheme.colors.primary,
                     textColor = Color.White,
-                    buttonText = "Leave training",
-                    buttonAction = { exitTrainingHandler.SetAndDisplayAreYouSurePopUp(
+                    buttonText = leaveTrainingText,
+                    buttonAction = { exitTrainingHandler.setAndDisplayAreYouSurePopUp(
                         infoClass = AreYouSureInfo(
-                                popUptitle = "Leave training",
+                                popUptitle = leaveTrainingText,
                                 popUpexplanation =
                                     buildAnnotatedString {
-                                        append("Are you sure you want to ")
+                                        append(areYouSureYouWantToText)
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) { append("leave ")}
-                                        append("this training?\n")
+                                        append("$thisTrainingText?\n")
 
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                            append("You can still access this training from the main menu.\n\n")
+                                            append("$stillAccessTrainingTipText.\n\n")
                                         }
 
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                            append("*Be aware that you have to finish the training for it to become accessible for the students and you")
+                                            append("*$beAwareFinishTrainingTipText")
                                         }
                                     },
-                                confirmActionText = "Leave training",
-                                cancelActionText = "Cancel",
+                                confirmActionText = leaveTrainingText,
+                                cancelActionText = cancelText,
                                 width = 420.dp,
                                 height = 280.dp,
                                 isDiscardTraining = false,
@@ -158,17 +162,17 @@ fun ExitTraingPopUpcomponent(exitTrainingHandler: ExitTraining, viewModel: LiveT
                     }
                 )
 
-                Spacer(Modifier.padding(PaddingStatic.Tiny))
+                Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
                 MenuButton(
                     backgroundColor = Color.White,
                     textColor = MaterialTheme.colors.primary,
-                    buttonText = "Cancel",
-                    buttonAction = { viewModel.ClosePopUpScreen() })
+                    buttonText = cancelText,
+                    buttonAction = { viewModel.closePopUpScreen() })
 
                 //functionality remove because no API support for this call
 
-//                Spacer(Modifier.padding(PaddingStatic.Small))
+//                Spacer(Modifier.padding(MaterialTheme.padding.small))
 //
 //                MenuButton(
 //                    backgroundColor = NegativeActionColor,
@@ -215,9 +219,9 @@ fun ExitTraingPopUpcomponent(exitTrainingHandler: ExitTraining, viewModel: LiveT
                         verticalArrangement = Arrangement.Center
                     ) {
                         AreYouSureContainer(areYouSureInfo = areYouSureInfo.value,
-                            cancelAction = { exitTrainingHandler.CloseAreYouSurePopUp() },
+                            cancelAction = { exitTrainingHandler.closeAreYouSurePopUp() },
                             {
-                                exitTrainingHandler.Confirm()
+                                exitTrainingHandler.confirm()
                             }
                         )
                     }
@@ -235,7 +239,7 @@ fun MenuButton(backgroundColor: Color, textColor: Color, buttonText: String, but
 
         Button(modifier = Modifier
             .weight(3f)
-            .shadow(2.dp, RoundedCornerShape(RoundedSizeStatic.Small))
+            .shadow(2.dp, RoundedCornerShape(MaterialTheme.roundedCornerShape.small))
             .height(32.dp),
             contentPadding = PaddingValues(0.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = backgroundColor),

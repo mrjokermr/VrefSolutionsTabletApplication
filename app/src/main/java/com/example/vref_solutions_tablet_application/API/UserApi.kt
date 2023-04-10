@@ -1,11 +1,11 @@
-package com.example.vref_solutions_tablet_application.API
+package com.example.vref_solutions_tablet_application.api
 
-import com.example.vref_solutions_tablet_application.API.RequestBodies.ActivationRequestBody
-import com.example.vref_solutions_tablet_application.API.RequestBodies.LoginRequestBody
-import com.example.vref_solutions_tablet_application.API.RequestBodies.UserPostRequestBody
-import com.example.vref_solutions_tablet_application.API.RequestBodies.UserPutRequestBody
-import com.example.vref_solutions_tablet_application.API.ResponseEntities.LoginResponseEntity
-import com.example.vref_solutions_tablet_application.API.ResponseEntities.UserResponseEntity
+import com.example.vref_solutions_tablet_application.api.requestBodies.ActivationRequestBody
+import com.example.vref_solutions_tablet_application.api.requestBodies.LoginRequestBody
+import com.example.vref_solutions_tablet_application.api.requestBodies.UserPostRequestBody
+import com.example.vref_solutions_tablet_application.api.requestBodies.UserPutRequestBody
+import com.example.vref_solutions_tablet_application.api.responseEntities.LoginResponseEntity
+import com.example.vref_solutions_tablet_application.api.responseEntities.UserResponseEntity
 import retrofit2.Response
 import retrofit2.http.*
 

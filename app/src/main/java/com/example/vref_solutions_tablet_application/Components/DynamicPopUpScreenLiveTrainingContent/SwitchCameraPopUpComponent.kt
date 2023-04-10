@@ -1,4 +1,4 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import androidx.compose.foundation.*
 import androidx.compose.runtime.Composable
@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -14,11 +15,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.vref_solutions_tablet_application.Models.CameraLinkObject
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.SwitchCamera
-import com.example.vref_solutions_tablet_application.StylingClasses.PaddingStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.RoundedSizeStatic
+import com.example.vref_solutions_tablet_application.R
+import com.example.vref_solutions_tablet_application.models.CameraLinkObject
+import com.example.vref_solutions_tablet_application.models.popUpModels.SwitchCamera
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.padding
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.roundedCornerShape
 
 @Composable
 fun SwitchCameraPopUpComponent(targetCamera: Int, cameraSwitchHandler: SwitchCamera) {
@@ -26,7 +29,7 @@ fun SwitchCameraPopUpComponent(targetCamera: Int, cameraSwitchHandler: SwitchCam
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .padding(PaddingStatic.Small)) {
+        .padding(MaterialTheme.padding.small)) {
 
         var selectedVideoToDisplay: State<CameraLinkObject> = cameraSwitchHandler.selectedCameraObject.collectAsState()
 
@@ -37,10 +40,10 @@ fun SwitchCameraPopUpComponent(targetCamera: Int, cameraSwitchHandler: SwitchCam
 
             Image(
                 painter = painterResource(id = selectedVideoToDisplay.value.thumbnailDrawableId),
-                contentDescription = "Selected camera display",
+                contentDescription = stringResource(R.string.selected_camera_display),
                 modifier = Modifier
                     .weight(4f)
-                    .clip(RoundedCornerShape(RoundedSizeStatic.Medium)),
+                    .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.medium)),
                 contentScale = ContentScale.FillBounds
             )
 
@@ -57,14 +60,14 @@ fun SwitchCameraPopUpComponent(targetCamera: Int, cameraSwitchHandler: SwitchCam
                             modifier = Modifier
                                 .height(120.dp)
                                 .fillMaxWidth()
-                                .padding(PaddingStatic.Tiny)
-                                .clip(RoundedCornerShape(RoundedSizeStatic.Small))
+                                .padding(MaterialTheme.padding.tiny)
+                                .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small))
                                 .border(BorderStroke(if(item.videoDisplayType == selectedVideoToDisplay.value.videoDisplayType) 2.dp else 0.dp, Color.White ))
                                 .clickable {
-                                    cameraSwitchHandler.ChangeSelectedCamera(item)
+                                    cameraSwitchHandler.changeSelectedCamera(item)
                                 },
                             painter = painterResource(id = item.thumbnailDrawableId),
-                            contentDescription = "Camera display select option",
+                            contentDescription = stringResource(R.string.camera_display_select_option),
                             contentScale = ContentScale.FillBounds
                         )
                     //}

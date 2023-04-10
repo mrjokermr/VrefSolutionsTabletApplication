@@ -1,7 +1,6 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import android.annotation.SuppressLint
-import android.app.Application
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -19,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -26,26 +26,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.viewModelScope
-import com.example.vref_solutions_tablet_application.Components.Buttons.RegularRectangleButton
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.AreYouSureInfo
+import com.example.vref_solutions_tablet_application.components.buttons.RegularRectangleButton
+import com.example.vref_solutions_tablet_application.enums.PopUpType
+import com.example.vref_solutions_tablet_application.handlers.LoggedInUserHandler
+import com.example.vref_solutions_tablet_application.models.popUpModels.AreYouSureInfo
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.ViewModels.AdminsViewModel
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.EditUser
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.NewOrganization
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.NewUser
-import com.example.vref_solutions_tablet_application.StylingClasses.*
+import com.example.vref_solutions_tablet_application.viewModels.AdminsViewModel
+import com.example.vref_solutions_tablet_application.models.popUpModels.EditUser
+import com.example.vref_solutions_tablet_application.models.popUpModels.NewOrganization
+import com.example.vref_solutions_tablet_application.models.popUpModels.NewUser
 import com.example.vref_solutions_tablet_application.ui.theme.NegativeActionColor
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackground
-import kotlinx.coroutines.launch
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.*
+
+
+
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.TextShadowStatic
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
     val popUpScreenHandler = viewModel.uiPopUpScreenType.value
-    val popUpScreenTitleDisplay = popUpScreenHandler.title
+    val popUpScreenTitleDisplay = stringResource(id = popUpScreenHandler.title)
 
     val loggedInUserHandler = LoggedInUserHandler(currentContext = LocalContext.current)
 
@@ -53,11 +55,11 @@ fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
         elevation = 12.dp, modifier = Modifier
             .width(popUpScreenHandler.width)
             .height(popUpScreenHandler.height)
-            .clip(RoundedCornerShape(RoundedSizeStatic.Small)),
+            .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small)),
         backgroundColor = PopUpBackground
     ) {
 
-        Column(modifier = Modifier.padding(PaddingStatic.Small)) {
+        Column(modifier = Modifier.padding(MaterialTheme.padding.small)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,16 +70,16 @@ fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
                 Text(
                     text = popUpScreenTitleDisplay,
                     color = Color(0xFFFFFFFF),
-                    fontSize = FontSizeStatic.Normal,
+                    fontSize = MaterialTheme.typography.h4.fontSize,
                     style = TextShadowStatic.Small()
                 )
                 Image(
                     painter = painterResource(id = R.drawable.x_circle_fill),
-                    contentDescription = "cross_icon",
+                    contentDescription = stringResource(R.string.cd_cross_icon),
                     modifier = Modifier
-                        .size(IconSizeStatic.Medium)
+                        .size(MaterialTheme.iconSize.medium)
                         .clickable {
-                            popUpScreenHandler.Cancel()
+                            popUpScreenHandler.cancel()
                         }
                 )
             }
@@ -99,6 +101,12 @@ fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
             if(!popUpScreenHandler.type.equals(PopUpType.EXIT_TRAINING)) {
                 val deleteButtonIsActive = popUpScreenHandler.type.equals(PopUpType.EDIT_USER)
 
+                val deleteTrainingText = stringResource(R.string.delete_training)
+                val areYouSureYouWantToDeleteUserText = "${stringResource(R.string.are_you_sure_you_want_to)} ${stringResource(R.string.delete)} ${stringResource(R.string.user)} "
+                val actionCantBeReversedText = stringResource(R.string.this_action_cant_reversed)
+                val deleteUserText = "${stringResource(R.string.delete)} ${stringResource(R.string.user)}"
+                val cancelText = stringResource(R.string.cancel)
+
                 Row(horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
                     if(deleteButtonIsActive) {
                         Column(modifier = Modifier.weight(2f), verticalArrangement = Arrangement.Bottom) {
@@ -107,18 +115,18 @@ fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(backgroundColor = NegativeActionColor),
                                 onClick = {
-                                    viewModel.SetAndDisplayAreYouSureInfo(
+                                    viewModel.setAndDisplayAreYouSureInfo(
                                         _areYouSureInfo = AreYouSureInfo(
-                                            popUptitle = "Delete training",
+                                            popUptitle = deleteTrainingText,
                                             popUpexplanation = buildAnnotatedString {
-                                                append("Are you sure you want to delete user ")
+                                                append(areYouSureYouWantToDeleteUserText)
                                                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                                     append("${viewModel.userToEdit.value.firstName} ${viewModel.userToEdit.value.lastName}?")
                                                 }
-                                                append("\n This action can't be reversed!")
+                                                append("\n $actionCantBeReversedText!")
                                             },
-                                            confirmActionText = "Delete user",
-                                            cancelActionText = "Cancel",
+                                            confirmActionText = deleteUserText,
+                                            cancelActionText = cancelText,
                                             width = 420.dp,
                                             height = 240.dp,
                                             isDiscardTraining = false,
@@ -129,11 +137,11 @@ fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
 
                                 }) {
                                 Text(
-                                    text = "Delete user",
+                                    text = deleteUserText,
                                     textAlign = TextAlign.Center,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = FontSizeStatic.Small
+                                    fontSize = MaterialTheme.typography.h5.fontSize
                                 )
                             }
                         }
@@ -145,11 +153,11 @@ fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
 
                     Column(modifier = Modifier.weight(if(deleteButtonIsActive) 3f else 1f)) {
 
-                        RegularRectangleButton(buttonText = popUpScreenHandler.confirmText, onClick = { popUpScreenHandler.Confirm() }, modifier = Modifier.fillMaxWidth(),
-                            fontSize = FontSizeStatic.Small, invertedColors = false)
+                        RegularRectangleButton(buttonText = stringResource(id = popUpScreenHandler.confirmText), onClick = { popUpScreenHandler.confirm() }, modifier = Modifier.fillMaxWidth(),
+                            fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = false)
 
-                        RegularRectangleButton(buttonText = popUpScreenHandler.cancelText, onClick = { popUpScreenHandler.Cancel() }, modifier = Modifier.fillMaxWidth(),
-                            fontSize = FontSizeStatic.Small, invertedColors = true)
+                        RegularRectangleButton(buttonText = stringResource(id = popUpScreenHandler.cancelText), onClick = { popUpScreenHandler.cancel() }, modifier = Modifier.fillMaxWidth(),
+                            fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = true)
 
                     }
                 } // end column
@@ -179,27 +187,19 @@ fun DynamicPopUpScreenAdmin(viewModel: AdminsViewModel) {
                     ) {
                         if(areYouSureInfo.value!!.isDeleteUser) {
                             AreYouSureContainer(areYouSureInfo = areYouSureInfo.value!!,
-                                cancelAction = { viewModel.ToggleAreYouSureScreen() },
+                                cancelAction = { viewModel.toggleAreYouSureScreen() },
                                 confirmAction = {
                                     //delete user that is being edited
-                                    viewModel.viewModelScope.launch {
-                                        viewModel.DeleteUser(
-                                            context = viewModel.getApplication<Application>().baseContext,
-                                            authKey = loggedInUserHandler.GetAuthKey()
-                                        )
-
-                                        viewModel.ToggleAreYouSureScreen()
-                                        viewModel.ToggleDynamicPopUpScreen()
-                                    }
+                                    viewModel.launchDeleteUser(authKey = loggedInUserHandler.getAuthKey())
                                 }
                             )
                         }
                         else {
                             AreYouSureContainer(areYouSureInfo = areYouSureInfo.value!!,
-                                cancelAction = { viewModel.ToggleAreYouSureScreen() },
+                                cancelAction = { viewModel.toggleAreYouSureScreen() },
                                 confirmAction = {
-                                    popUpScreenHandler.Confirm()
-                                    viewModel.ToggleAreYouSureScreen()
+                                    popUpScreenHandler.confirm()
+                                    viewModel.toggleAreYouSureScreen()
                                 }
                             )
                         }

@@ -1,4 +1,4 @@
-package com.example.vref_solutions_tablet_application.Screens
+package com.example.vref_solutions_tablet_application.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -27,52 +27,37 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.vref_solutions_tablet_application.Components.DynamicPopUpScreenAdmin
-import com.example.vref_solutions_tablet_application.Components.TopBarComp
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.NewUser
-import com.example.vref_solutions_tablet_application.Models.Organization
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.EditUser
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.NewOrganization
-import com.example.vref_solutions_tablet_application.Models.User
+import com.example.vref_solutions_tablet_application.components.DynamicPopUpScreenAdmin
+import com.example.vref_solutions_tablet_application.components.TopBarComp
+import com.example.vref_solutions_tablet_application.handlers.LoggedInUserHandler
+import com.example.vref_solutions_tablet_application.models.popUpModels.NewUser
+import com.example.vref_solutions_tablet_application.models.popUpModels.NewOrganization
 import com.example.vref_solutions_tablet_application.R
 import com.example.vref_solutions_tablet_application.ScreenNavName
-import com.example.vref_solutions_tablet_application.StylingClasses.*
-import com.example.vref_solutions_tablet_application.ViewModels.AdminsViewModel
-import com.example.vref_solutions_tablet_application.ui.theme.NegativeActionColor
+import com.example.vref_solutions_tablet_application.screens.superAdminAndAdminScreen.DisplayUserRowAdminScreen
+import com.example.vref_solutions_tablet_application.screens.superAdminAndAdminScreen.OrganisationSummaryListItem
+import com.example.vref_solutions_tablet_application.viewModels.AdminsViewModel
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackgroundDarker
-import kotlinx.coroutines.launch
+
+
+
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.TextShadowStatic
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.*
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navController: NavController) {
     viewModel.navController = navController
     val currentContext = LocalContext.current
-    viewModel.context = currentContext
 
     val loggedInUserHandler: LoggedInUserHandler = LoggedInUserHandler(currentContext = currentContext)
-    val currentUserIsSuperAdmin = loggedInUserHandler.UserIsSuperAdmin()
+    val currentUserIsSuperAdmin = loggedInUserHandler.userIsSuperAdmin()
 
     val currentlySelectedOrganization = viewModel.uiSelectedOrganization.collectAsState()
 
-    viewModel.viewModelScope.launch {
-        //viewModel.GetAllUsers(loggedInUserHandler.GetAuthKey())
-        if(!currentUserIsSuperAdmin) {
-            //because the user is not a super admin, the users list will be prefilled and can't be selected
-            try {
-                viewModel.GetAllUsersForOrganisation(authKey = loggedInUserHandler.GetAuthKey(), organisationId = loggedInUserHandler.GetCompanyIdCurrentUser().toLong())
-            }
-            catch(e: Throwable) {
-                Toast.makeText(currentContext,"Couldn't load the users for your organisation, try again later.", Toast.LENGTH_LONG).show()
-            }
-        }
-        else {
-            viewModel.GetAllOrganisationsInfo(authKey = loggedInUserHandler.GetAuthKey())
-        }
-    }
+    viewModel.launchInitialAdminScreenSetup(currentUserIsSuperAdmin =  currentUserIsSuperAdmin, loggedInUserHandler = loggedInUserHandler)
 
     Scaffold(
         topBar = { TopBarComp(ScreenNavName.MainMenu, navController = navController,hideLogOutButton = false) },
@@ -83,20 +68,20 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                     modifier = Modifier.zIndex(1f),
                     backgroundColor = MaterialTheme.colors.primary,
                     onClick = {
-                        viewModel.SetPopUpScreenType(NewUser())
-                        viewModel.ToggleDynamicPopUpScreen()
+                        viewModel.setPopUpScreenType(NewUser())
+                        viewModel.toggleDynamicPopUpScreen()
                     }) {
 
                     Row(modifier = Modifier
                         .padding(
-                            top = PaddingStatic.Tiny, bottom = PaddingStatic.Tiny,
-                            start = PaddingStatic.Small, end = PaddingStatic.Small
+                            top = MaterialTheme.padding.tiny, bottom = MaterialTheme.padding.tiny,
+                            start = MaterialTheme.padding.small, end = MaterialTheme.padding.small
                         ),
                         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "New user", color = Color.White, fontWeight = FontWeight.Bold, fontSize = FontSizeStatic.Small,style = TextShadowStatic.Small())
-                        Spacer(Modifier.padding(PaddingStatic.Small))
+                        Text(text = "New user", color = Color.White, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.h5.fontSize,style = TextShadowStatic.Small())
+                        Spacer(Modifier.padding(MaterialTheme.padding.small))
                         Image(
-                            modifier = Modifier.size(IconSizeStatic.Medium),
+                            modifier = Modifier.size(MaterialTheme.iconSize.medium),
                             painter = painterResource(id = R.drawable.plus),
                             contentDescription = "plus icon"
                         )
@@ -105,7 +90,7 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
             }
 
         } ,
-//        modifier = Modifier.padding(PaddingStatic.Small)
+//        modifier = Modifier.padding(MaterialTheme.padding.small)
     ) {
 
         Row(Modifier.zIndex(1f)) {
@@ -115,7 +100,7 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
             if(currentUserIsSuperAdmin) {
                 Column(modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(topEnd = RoundedSizeStatic.Medium))
+                    .clip(RoundedCornerShape(topEnd = MaterialTheme.roundedCornerShape.medium))
                     .fillMaxHeight()
                     .background(PopUpBackgroundDarker)) {
 
@@ -129,47 +114,47 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                                 defaultElevation = 0.dp,
                                 pressedElevation = 0.dp
                             ),
-                            onClick = { viewModel.NavigateToPage(ScreenNavName.MainMenu) }) {
+                            onClick = { viewModel.navigateToPage(ScreenNavName.MainMenu) }) {
 
                             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                                 Image(
                                     painter = painterResource(id = R.drawable.chevron_left),
                                     contentDescription = "chevron left",
-                                    modifier = Modifier.size(IconSizeStatic.Small)
+                                    modifier = Modifier.size(MaterialTheme.iconSize.small)
                                 )
 
-                                Spacer(Modifier.padding(PaddingStatic.Mini))
+                                Spacer(Modifier.padding(MaterialTheme.padding.mini))
 
-                                Text(text = "Back", color = MaterialTheme.colors.primaryVariant,style = TextShadowStatic.Small(), fontSize = FontSizeStatic.Small)
+                                Text(text = "Back", color = MaterialTheme.colors.primaryVariant,style = TextShadowStatic.Small(), fontSize = MaterialTheme.typography.h5.fontSize)
                             }
                         }
 
-                        Spacer(Modifier.padding(PaddingStatic.Tiny))
+                        Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
-                        Text(text = "Organizations", fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline, fontSize = FontSizeStatic.Normal, color = Color.White,
-                            modifier = Modifier.padding(start = PaddingStatic.Tiny),style = TextShadowStatic.Small())
+                        Text(text = "Organizations", fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline, fontSize = MaterialTheme.typography.h4.fontSize, color = Color.White,
+                            modifier = Modifier.padding(start = MaterialTheme.padding.tiny),style = TextShadowStatic.Small())
                     }
 
-                    Spacer(Modifier.padding(PaddingStatic.Small))
+                    Spacer(Modifier.padding(MaterialTheme.padding.small))
 
                     LazyColumn(modifier = Modifier.weight(5f)) {
                         items(allOrganisationInfo.value.size) {
                             OrganisationSummaryListItem(organization = allOrganisationInfo.value[it], viewModel = viewModel, loggedInUserHandler = loggedInUserHandler)
 
-                            Spacer(Modifier.padding(PaddingStatic.Mini))
+                            Spacer(Modifier.padding(MaterialTheme.padding.mini))
                         }
                     }
 
-                    Spacer(Modifier.padding(PaddingStatic.Small))
+                    Spacer(Modifier.padding(MaterialTheme.padding.small))
 
-                    Column(modifier = Modifier.weight(1f).fillMaxWidth().padding(end = PaddingStatic.Tiny), horizontalAlignment = Alignment.End) {
+                    Column(modifier = Modifier.weight(1f).fillMaxWidth().padding(end = MaterialTheme.padding.tiny), horizontalAlignment = Alignment.End) {
 
                         Button(
                             onClick = {
-                                viewModel.SetPopUpScreenType(NewOrganization())
-                                viewModel.ToggleDynamicPopUpScreen()
+                                viewModel.setPopUpScreenType(NewOrganization())
+                                viewModel.toggleDynamicPopUpScreen()
                             },
-                            contentPadding = PaddingValues(start = PaddingStatic.Tiny, end = PaddingStatic.Tiny),
+                            contentPadding = PaddingValues(start = MaterialTheme.padding.tiny, end = MaterialTheme.padding.tiny),
                             shape = RoundedCornerShape(38),
                             colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary ),
                             modifier = Modifier
@@ -180,14 +165,14 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                                 Text(
                                     text = "New organization",
                                     color = MaterialTheme.colors.onSurface,
-                                    fontSize = FontSizeStatic.AdminMenuButtonText,
+                                    fontSize = MaterialTheme.typography.body2.fontSize,
                                     style = TextShadowStatic.Small()
                                 )
                                 Spacer(Modifier.padding(start = 8.dp, end = 4.dp))
                                 Image(
                                     painter = painterResource(id = R.drawable.plus),
                                     contentDescription = "plus_icon",
-                                    modifier = Modifier.size(IconSizeStatic.Tiny)
+                                    modifier = Modifier.size(MaterialTheme.iconSize.tiny)
                                 )
                             }
                         }
@@ -211,24 +196,24 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                             defaultElevation = 0.dp,
                             pressedElevation = 0.dp
                         ),
-                        onClick = { viewModel.NavigateToPage(ScreenNavName.MainMenu) }) {
+                        onClick = { viewModel.navigateToPage(ScreenNavName.MainMenu) }) {
 
                         Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                             Image(
                                 painter = painterResource(id = R.drawable.chevron_left),
                                 contentDescription = "chevron left",
-                                modifier = Modifier.size(IconSizeStatic.Small)
+                                modifier = Modifier.size(MaterialTheme.iconSize.small)
                             )
 
-                            Spacer(Modifier.padding(PaddingStatic.Mini))
+                            Spacer(Modifier.padding(MaterialTheme.padding.mini))
 
-                            Text(text = "Back", color = MaterialTheme.colors.primaryVariant,style = TextShadowStatic.Small(),fontSize = FontSizeStatic.Small)
+                            Text(text = "Back", color = MaterialTheme.colors.primaryVariant,style = TextShadowStatic.Small(),fontSize = MaterialTheme.typography.h5.fontSize)
                         }
                     }
                 }
 
                 //Display users here
-                Column(Modifier.padding(PaddingStatic.Small)) {
+                Column(Modifier.padding(MaterialTheme.padding.small)) {
 
                     //edit company name here
                     Row() {
@@ -257,11 +242,11 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                             disabledTextColor = Color.White,
                             textColor = Color.White,
                         ), textStyle = TextStyle(
-                            fontSize = FontSizeStatic.Normal,
+                            fontSize = MaterialTheme.typography.h4.fontSize,
                             fontWeight = FontWeight.Bold,
                         ),
                             value = inputOrganizationName.value, onValueChange = {
-                            viewModel.SetOrganizationNameInput(value = it, context = currentContext)
+                            viewModel.setOrganizationNameInput(value = it)
                         }, trailingIcon = {
                            if(currentUserIsSuperAdmin == false || (currentUserIsSuperAdmin && currentlySelectedOrganization.value != null)) {
                                if(inputOrganizationName.value == initialCurrentlySelectedOrganizationName.value) {
@@ -269,7 +254,7 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                                        if(textFieldIsFocussed) {
                                            Image(
                                                modifier = Modifier
-                                                   .size(IconSizeStatic.Small)
+                                                   .size(MaterialTheme.iconSize.small)
                                                    .clickable {
                                                        //cancel change of organization name
                                                        focusManager.clearFocus()
@@ -281,7 +266,7 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                                        else {
                                            Image(
                                                modifier = Modifier
-                                                   .size(IconSizeStatic.Small)
+                                                   .size(MaterialTheme.iconSize.small)
                                                    .zIndex(-1f)
                                                    .clickable {
                                                        focusRequester.requestFocus()
@@ -295,40 +280,31 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                                }
                                else
                                    Row() {
-                                       Spacer(Modifier.padding(PaddingStatic.Tiny))
+                                       Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
                                        Image(
                                            modifier = Modifier
-                                               .size(IconSizeStatic.Small)
+                                               .size(MaterialTheme.iconSize.small)
                                                .clickable {
                                                    //confirm change name of organization
                                                    if(currentUserIsSuperAdmin) {
                                                        if(currentlySelectedOrganization.value != null) {
                                                            try {
-                                                               viewModel.viewModelScope.launch {
-                                                                   viewModel.ConfirmChangingOrganizationName(
-                                                                       organizationId = currentlySelectedOrganization.value!!.id,
-                                                                       authKey = loggedInUserHandler.GetAuthKey(),
-                                                                       context = currentContext)
-                                                               }
+                                                               viewModel.launchConfirmChangingOrganizationName(organizationId = currentlySelectedOrganization.value!!.id, authKey = loggedInUserHandler.getAuthKey())
                                                            }
                                                            catch(e: Throwable) {
                                                                Toast.makeText(currentContext, "Couldn't change the organization name try again later",Toast.LENGTH_LONG).show()
                                                            }
                                                        }
                                                    } else {
-                                                       viewModel.viewModelScope.launch {
-                                                           try {
-                                                               viewModel.ConfirmChangingOrganizationName(
-                                                                   organizationId = loggedInUserHandler.GetCompanyIdCurrentUser().toLong(),
-                                                                   authKey = loggedInUserHandler.GetAuthKey(),
-                                                                   context = currentContext
-                                                               )
-                                                           }
-                                                           catch(e: Throwable) {
-                                                               Toast.makeText(currentContext, "Couldn't change the organization name try again later",Toast.LENGTH_LONG).show()
-                                                           }
+                                                       try {
+                                                           viewModel.launchConfirmChangingOrganizationName(organizationId = loggedInUserHandler.getCompanyIdCurrentUser().toLong(),
+                                                               authKey = loggedInUserHandler.getAuthKey()
+                                                           )
+                                                       } catch (e: Throwable) {
+                                                           Toast.makeText(currentContext, "Couldn't change the organization name try again later", Toast.LENGTH_LONG).show()
                                                        }
+
                                                    }
                                                    focusManager.clearFocus()
                                                },
@@ -336,14 +312,14 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                                            contentDescription = "check icon"
                                        )
 
-                                       Spacer(Modifier.padding(PaddingStatic.Mini))
+                                       Spacer(Modifier.padding(MaterialTheme.padding.mini))
 
                                        Image(
                                            modifier = Modifier
-                                               .size(IconSizeStatic.Small)
+                                               .size(MaterialTheme.iconSize.small)
                                                .clickable {
                                                    //cancel change of organization name
-                                                   viewModel.CancelChangingOrganizationName()
+                                                   viewModel.cancelChangingOrganizationName()
                                                    focusManager.clearFocus()
                                                },
                                            painter = painterResource(id = R.drawable.x_lg),
@@ -358,32 +334,32 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
 
                     }
 
-                    Spacer(Modifier.padding(PaddingStatic.Small))
+                    Spacer(Modifier.padding(MaterialTheme.padding.small))
 
                     //display users part or display Organization & User management text
                     if(currentUserIsSuperAdmin == false || (currentUserIsSuperAdmin && currentlySelectedOrganization.value != null)) {
                         //user text title here
                         Row(modifier = Modifier.fillMaxWidth()) {
-                            Text(text = "Users", fontSize = FontSizeStatic.Normal,color = Color.White, textDecoration = TextDecoration.Underline, fontWeight = FontWeight.Bold
+                            Text(text = "Users", fontSize = MaterialTheme.typography.h4.fontSize,color = Color.White, textDecoration = TextDecoration.Underline, fontWeight = FontWeight.Bold
                                 ,style = TextShadowStatic.Small())
                         }
 
-                        Spacer(Modifier.padding(PaddingStatic.Tiny))
+                        Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
                         //Row with Column-Titles
                         Row(Modifier.fillMaxWidth()) {
-                            Text(text = "Fullname", color = Color.Gray, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = FontSizeStatic.Normal
+                            Text(text = "Fullname", color = Color.Gray, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.h4.fontSize
                                 ,style = TextShadowStatic.Small())
-                            Text(text = "E-mail", color = Color.Gray, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = FontSizeStatic.Normal
+                            Text(text = "E-mail", color = Color.Gray, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.h4.fontSize
                                 ,style = TextShadowStatic.Small())
 
-                            Spacer(Modifier.padding(PaddingStatic.Mini))
+                            Spacer(Modifier.padding(MaterialTheme.padding.mini))
 
-                            Text(text = "User Type", color = Color.Gray, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = FontSizeStatic.Normal
+                            Text(text = "User Type", color = Color.Gray, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.h4.fontSize
                                 ,style = TextShadowStatic.Small())
                         }
 
-                        Spacer(Modifier.padding(PaddingStatic.Small))
+                        Spacer(Modifier.padding(MaterialTheme.padding.small))
 
                         val allUsers = viewModel.uiAllUsers.collectAsState()
 
@@ -392,21 +368,21 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
                             items(allUsers.value.size) {
                                 DisplayUserRowAdminScreen(viewModel = viewModel, user = allUsers.value[it])
 
-                                Spacer(Modifier.padding(PaddingStatic.Mini))
+                                Spacer(Modifier.padding(MaterialTheme.padding.mini))
                             }
 
                             item() {
                                 //this part is for preventing that the new user button is overlapping the editing the last user in the list
-                                Spacer(Modifier.padding(PaddingStatic.Medium))
+                                Spacer(Modifier.padding(MaterialTheme.padding.medium))
                             }
                         }
                     }
                     else {
-                        Text(text = "Organization & User Management", textAlign = TextAlign.Center, fontSize = FontSizeStatic.MediumTitle,
+                        Text(text = "Organization & User Management", textAlign = TextAlign.Center, fontSize = MaterialTheme.typography.h2.fontSize,
                             color = MaterialTheme.colors.primary,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = PaddingStatic.ExtraLarge)
+                                .padding(top = MaterialTheme.padding.extraLarge)
                             ,style = TextShadowStatic.Small())
 
                     }
@@ -432,98 +408,3 @@ fun SuperAdminAndAdminScreen(viewModel: AdminsViewModel = viewModel(), navContro
 
 } // END composable screen function
 
-
-@Composable
-fun OrganisationSummaryListItem(organization: Organization,viewModel: AdminsViewModel, loggedInUserHandler: LoggedInUserHandler) {
-    val selectedOrganization = viewModel.uiSelectedOrganization.collectAsState()
-    var thisButtonIsActive = false
-    if(selectedOrganization.value != null) {
-        thisButtonIsActive = organization == selectedOrganization.value
-    }
-
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .background(MaterialTheme.colors.onBackground)
-        .padding(PaddingStatic.Tiny), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text(text = organization.name, color = Color.White, fontWeight = FontWeight.Bold,style = TextShadowStatic.Small(), fontSize = FontSizeStatic.Small,
-                modifier = Modifier.weight(4f))
-
-        Button(
-            onClick = {
-                viewModel.SelectOrDeselectAndDisplayOrganisation(organization = organization, authKey = loggedInUserHandler.GetAuthKey())
-            },
-            contentPadding = PaddingValues(0.dp),
-            shape = RoundedCornerShape(38),
-            colors = ButtonDefaults.buttonColors(backgroundColor = if(thisButtonIsActive) NegativeActionColor else MaterialTheme.colors.primaryVariant ),
-            modifier = Modifier.weight(3f).height(34.dp)
-
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = if (thisButtonIsActive) R.drawable.x_circle_fill else R.drawable.pencil_white),
-                    contentDescription = "eye_icon",
-                    modifier = Modifier.size(IconSizeStatic.Tiny)
-                )
-                Spacer(Modifier.padding(start = 8.dp, end = 4.dp))
-                Text(
-                    text = if (thisButtonIsActive) "Close" else "Manage",
-                    color = MaterialTheme.colors.onSurface,
-                    fontSize = FontSizeStatic.AdminMenuButtonText,
-                    style = TextShadowStatic.Small()
-                )
-            }
-        }
-
-    }
-}
-
-
-@Composable
-fun DisplayUserRowAdminScreen(user: User, viewModel: AdminsViewModel) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-
-        Text(text = user.FullName(), color = Color.White, modifier = Modifier.weight(1f), fontSize = FontSizeStatic.Normal,style = TextShadowStatic.Small())
-        Text(text = user.email, color = Color.White, modifier = Modifier.weight(1f), fontSize = FontSizeStatic.Normal,style = TextShadowStatic.Small())
-
-        Spacer(Modifier.padding(PaddingStatic.Mini))
-
-        Row(modifier = Modifier
-            .weight(1f)
-            .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Text(text = user.userType.toString(), color = Color.White, modifier = Modifier.weight(3f), fontSize = FontSizeStatic.Normal,style = TextShadowStatic.Small())
-
-            Button(
-                contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent),
-                modifier = Modifier.weight(1f),
-                elevation = elevation(
-                    defaultElevation = 0.dp,
-                    pressedElevation = 0.dp
-                ),
-                onClick = {
-                    viewModel.SetPopUpScreenType(EditUser())
-                    viewModel.userToEdit.value = user
-                    viewModel.ToggleDynamicPopUpScreen()
-                }
-            ) {
-                Image(
-                    modifier = Modifier.size(IconSizeStatic.Small),
-                    painter = painterResource(id = R.drawable.pencil_purple),
-                    contentDescription = "edit icon"
-                )
-            }
-//            Row(modifier = Modifier.padding(top = PaddingStatic.Tiny, bottom = PaddingStatic.Tiny ,
-//                start = PaddingStatic.Small, end = PaddingStatic.Small),
-//                horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-//                Text(text = "New user", color = Color.White, fontWeight = FontWeight.Bold, fontSize = FontSizeStatic.Small)
-//                Spacer(Modifier.padding(PaddingStatic.Small))
-//                Image(
-//                    modifier = Modifier.size(IconSizeStatic.Medium),
-//                    painter = painterResource(id = R.drawable.plus),
-//                    contentDescription = "plus icon"
-//                )
-//            }
-        }
-
-    }
-}

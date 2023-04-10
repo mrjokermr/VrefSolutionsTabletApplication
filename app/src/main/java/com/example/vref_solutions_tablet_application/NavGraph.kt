@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.vref_solutions_tablet_application.Screens.*
+import com.example.vref_solutions_tablet_application.screens.*
 
 @Composable
 fun SetupNavGraph(

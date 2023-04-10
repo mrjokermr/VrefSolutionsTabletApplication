@@ -1,30 +1,36 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.vref_solutions_tablet_application.Components.Buttons.RegularRectangleButton
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.*
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.StylingClasses.*
-import com.example.vref_solutions_tablet_application.ViewModels.LiveTrainingViewModel
+import com.example.vref_solutions_tablet_application.components.buttons.RegularRectangleButton
+import com.example.vref_solutions_tablet_application.enums.PopUpType
+import com.example.vref_solutions_tablet_application.models.popUpModels.*
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackground
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.TextShadowStatic
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.iconSize
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.padding
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.roundedCornerShape
+import com.example.vref_solutions_tablet_application.viewModels.LiveTrainingViewModel
 
 
 @Composable
 fun DyanmicPopUpScreenLiveTraining(popUpScreenHandler: BasePopUpScreen, viewModel: LiveTrainingViewModel) {
 
-    var popUpScreenTitleDisplay: String = popUpScreenHandler.title
+    var popUpScreenTitleDisplay: String = stringResource(id = popUpScreenHandler.title)
 
     if (popUpScreenHandler.type.equals(PopUpType.SWITCH_CAMERA_1)) popUpScreenTitleDisplay += " 1"
     else if (popUpScreenHandler.type.equals(PopUpType.SWITCH_CAMERA_2)) popUpScreenTitleDisplay += " 2"
@@ -33,11 +39,11 @@ fun DyanmicPopUpScreenLiveTraining(popUpScreenHandler: BasePopUpScreen, viewMode
         elevation = 12.dp, modifier = Modifier
             .width(popUpScreenHandler.width)
             .height(popUpScreenHandler.height)
-            .clip(RoundedCornerShape(RoundedSizeStatic.Small)),
+            .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small)),
         backgroundColor = PopUpBackground
     ) {
 
-        Column(modifier = Modifier.padding(PaddingStatic.Small)) {
+        Column(modifier = Modifier.padding(MaterialTheme.padding.small)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -48,16 +54,16 @@ fun DyanmicPopUpScreenLiveTraining(popUpScreenHandler: BasePopUpScreen, viewMode
                 Text(
                     text = popUpScreenTitleDisplay,
                     color = Color(0xFFFFFFFF),
-                    fontSize = FontSizeStatic.Normal,
+                    fontSize = MaterialTheme.typography.h4.fontSize,
                     style = TextShadowStatic.Small()
                 )
                 Image(
                     painter = painterResource(id = R.drawable.x_circle_fill),
-                    contentDescription = "cross_icon",
+                    contentDescription = stringResource(R.string.cd_cross_icon),
                     modifier = Modifier
-                        .size(IconSizeStatic.Medium)
+                        .size(MaterialTheme.iconSize.medium)
                         .clickable {
-                            popUpScreenHandler.Cancel()
+                            popUpScreenHandler.cancel()
                         }
                 )
             }
@@ -94,7 +100,7 @@ fun DyanmicPopUpScreenLiveTraining(popUpScreenHandler: BasePopUpScreen, viewMode
                     )
                 } else if (popUpScreenHandler.type.equals(PopUpType.SWITCH_CAMERA_1)) {
                     val switchCameraHandler: SwitchCamera = popUpScreenHandler as SwitchCamera
-                    switchCameraHandler.SetSelectedCameraObject(viewModel.GetLargeVideoPlayerActiveCameraLinkObject())
+                    switchCameraHandler.setSelectedCameraObject(viewModel.getLargeVideoPlayerActiveCameraLinkObject())
 
                     SwitchCameraPopUpComponent(
                         targetCamera = 1,
@@ -102,7 +108,7 @@ fun DyanmicPopUpScreenLiveTraining(popUpScreenHandler: BasePopUpScreen, viewMode
                     )
                 } else if (popUpScreenHandler.type.equals(PopUpType.SWITCH_CAMERA_2)) {
                     val switchCameraHandler: SwitchCamera = popUpScreenHandler as SwitchCamera
-                    switchCameraHandler.SetSelectedCameraObject(viewModel.GetSmallVideoPlayerActiveCameraLinkObject())
+                    switchCameraHandler.setSelectedCameraObject(viewModel.getSmallVideoPlayerActiveCameraLinkObject())
 
                     SwitchCameraPopUpComponent(
                         targetCamera = 2,
@@ -129,19 +135,25 @@ fun DyanmicPopUpScreenLiveTraining(popUpScreenHandler: BasePopUpScreen, viewMode
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(
-                            if (popUpScreenHandler.type.equals(PopUpType.EXIT_TRAINING) || popUpScreenHandler.type.equals(PopUpType.EDIT_EVENT)) 0.0001f //for some reason 0f without the or statement would work but with the extra or statement it wouldn't  so used 0.0001f
+                            if (popUpScreenHandler.type.equals(PopUpType.EXIT_TRAINING) || popUpScreenHandler.type.equals(
+                                    PopUpType.EDIT_EVENT
+                                )
+                            ) 0.0001f //for some reason 0f without the or statement would work but with the extra or statement it wouldn't  so used 0.0001f
                             else 1f
                         ),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
 
-                    RegularRectangleButton(buttonText = popUpScreenHandler.cancelText, onClick = { popUpScreenHandler.Cancel() }, modifier = Modifier.weight(1f),
-                        fontSize = FontSizeStatic.Small, invertedColors = true)
+                    RegularRectangleButton(buttonText = stringResource(id = popUpScreenHandler.cancelText), onClick = { popUpScreenHandler.cancel() }, modifier = Modifier.weight(1f),
+                        fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = true)
 
-                    Spacer(Modifier.fillMaxWidth().weight(if (popUpScreenHandler.type.equals(PopUpType.EXIT_TRAINING)) 1f else 2f))
+                    Spacer(
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(if (popUpScreenHandler.type.equals(PopUpType.EXIT_TRAINING)) 1f else 2f))
 
-                    RegularRectangleButton(buttonText = popUpScreenHandler.confirmText, onClick = { popUpScreenHandler.Confirm() }, modifier = Modifier.weight(1f),
-                        fontSize = FontSizeStatic.Small, invertedColors = false)
+                    RegularRectangleButton(buttonText = stringResource(id = popUpScreenHandler.confirmText), onClick = { popUpScreenHandler.confirm() }, modifier = Modifier.weight(1f),
+                        fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = false)
 
                 } // end row
             }

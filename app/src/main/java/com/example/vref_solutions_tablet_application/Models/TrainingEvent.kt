@@ -1,13 +1,8 @@
-package com.example.vref_solutions_tablet_application.Models
+package com.example.vref_solutions_tablet_application.models
 
-import android.util.Log
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import com.example.vref_solutions_tablet_application.Enums.FeedbackTarget
-import com.example.vref_solutions_tablet_application.Enums.IconNames
-import com.example.vref_solutions_tablet_application.Handlers.IconDisplayHandler
-import com.example.vref_solutions_tablet_application.Handlers.PrescribedEventsHandler
-import com.example.vref_solutions_tablet_application.R
+import com.example.vref_solutions_tablet_application.enums.FeedbackTarget
+import com.example.vref_solutions_tablet_application.handlers.IconDisplayHandler
+import com.example.vref_solutions_tablet_application.handlers.PrescribedEventsHandler
 
 class TrainingEvent(
     val id: Long,
@@ -18,7 +13,7 @@ class TrainingEvent(
 ) {
 
     companion object {
-        fun GetMessageAsReadableDevidedFeedback(feedbackContainer: DevidedFeedbackContainer): String {
+        fun getMessageAsReadableDevidedFeedback(feedbackContainer: DevidedFeedbackContainer): String {
             var devidedableMessageString = ""
 
             devidedableMessageString += "[everyone] " + feedbackContainer.everyone
@@ -33,10 +28,10 @@ class TrainingEvent(
     var devidedFeedbackContainer = DevidedFeedbackContainer()
 
     init {
-        SplitMessageIntoDevidedFeedbackMessage()
+        splitMessageIntoDevidedFeedbackMessage()
     }
 
-    private fun SplitMessageIntoDevidedFeedbackMessage() {
+    private fun splitMessageIntoDevidedFeedbackMessage() {
         //Why not used JSON? because the other student implementing this feedback in his front-end didn't include this functionality in his/her app
         //so without using JSON and by using this custom method the feedback on his screen will be: [everyone] has flown nicely [studentOne] did extremely well
         //otherwise it would be a 'unreadable' and ugly string in his/her front-end with a lot of { } { } { } symbols.
@@ -64,7 +59,7 @@ class TrainingEvent(
         else devidedFeedbackContainer.everyone = message
     }
 
-    fun SetNewSymbolName(newSymbolName: String) {
+    fun setNewSymbolName(newSymbolName: String) {
         if(newSymbolName == "fb_manual" || newSymbolName == "fb_quick") symbol = newSymbolName
         else {
             //fb_quick training-event will be converted to fb_manual because the icon is manually changed
@@ -73,29 +68,29 @@ class TrainingEvent(
 
     }
 
-    fun GetIconPainterId(): Int {
-        if(symbol.contains("fb_prescribed")) return PrescribedEventsHandler.GetDrawableIdBySymbolName(symbol)
-        else return IconDisplayHandler.GetPainterIdForSymbolName(symbolName = symbol)
+    fun getIconPainterId(): Int {
+        if(symbol.contains("fb_prescribed")) return PrescribedEventsHandler.getDrawableIdBySymbolName(symbol)
+        else return IconDisplayHandler.getPainterIdForSymbolName(symbolName = symbol)
     }
 
-    fun IsPrescribedEvent(): Boolean {
+    fun isPrescribedEvent(): Boolean {
         return symbol.contains("fb_prescribed")
     }
 
-    fun IsInstructorsFeedback(): Boolean {
+    fun isInstructorsFeedback(): Boolean {
         if(symbol.contains("fb_manual") || symbol.contains("fb_quick")) return true
         else return false
     }
 
-    fun IsQuickInstructorFeedback(): Boolean {
+    fun isQuickInstructorFeedback(): Boolean {
         return symbol.contains("fb_quick")
     }
 
-    fun IsManualInstructorFeedback(): Boolean {
+    fun isManualInstructorFeedback(): Boolean {
         return symbol.contains("fb_manual")
     }
 
-    fun IsAutomaticFeedback(): Boolean {
+    fun isAutomaticFeedback(): Boolean {
         if(symbol.contains("fb_auto")) return true
         else return false
     }

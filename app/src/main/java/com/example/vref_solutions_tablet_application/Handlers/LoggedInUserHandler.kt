@@ -1,15 +1,14 @@
-package com.example.vref_solutions_tablet_application.Handlers
+package com.example.vref_solutions_tablet_application.handlers
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.example.vref_solutions_tablet_application.Models.User
-import com.example.vref_solutions_tablet_application.Enums.UserType
-import com.example.vref_solutions_tablet_application.Models.Organization
-import com.example.vref_solutions_tablet_application.Models.SavableTrainingInfo
-import com.example.vref_solutions_tablet_application.Models.SearchQueryObject
+import com.example.vref_solutions_tablet_application.models.User
+import com.example.vref_solutions_tablet_application.enums.UserType
+import com.example.vref_solutions_tablet_application.models.Organization
+import com.example.vref_solutions_tablet_application.models.SearchQueryObject
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import java.util.*
@@ -38,10 +37,10 @@ class LoggedInUserHandler() {
         )
     }
 
-    fun GetSavedStudentSearchQueryInputList(): MutableList<SearchQueryObject> {
+    fun getSavedStudentSearchQueryInputList(): MutableList<SearchQueryObject> {
         //val typeObject: MutableList<SearchQueryObject> = emptyList<SearchQueryObject>().toMutableList()
         val typeObject = object : TypeToken<MutableList<SearchQueryObject>>() {}.type
-        val stringResult = sharedPreferences.getString("SearchQueryInputList${GetIdCurrentUser()}","").toString()
+        val stringResult = sharedPreferences.getString("SearchQueryInputList${getIdCurrentUser()}","").toString()
         if(stringResult.length > 0) {
             try {
                 var test: MutableList<SearchQueryObject> = gson.fromJson(stringResult, typeObject)
@@ -58,7 +57,7 @@ class LoggedInUserHandler() {
 
     }
 
-    fun SetSavedStudentSearchQueryInputListAsString(updatedQueryList: MutableList<SearchQueryObject>, userId: String) {
+    fun setSavedStudentSearchQueryInputListAsString(updatedQueryList: MutableList<SearchQueryObject>, userId: String) {
         try {
             val value = gson.toJson(updatedQueryList,object : TypeToken<MutableList<SearchQueryObject>>() {}.type)
             Log.i("Set",value)
@@ -70,7 +69,7 @@ class LoggedInUserHandler() {
 
     }
 
-    fun SetCurrentlyLoggedInUserData(userInfo: User) {
+    fun setCurrentlyLoggedInUserData(userInfo: User) {
         try {
             val value = gson.toJson(userInfo,object : TypeToken<User>() {}.type)
             sharedPreferences.edit().putString("currentlyLoggedInUserInfo",value).apply()
@@ -81,7 +80,7 @@ class LoggedInUserHandler() {
 
     }
 
-    private fun GetSavedUserInfo(): User? {
+    private fun getSavedUserInfo(): User? {
         //val typeObject: MutableList<SearchQueryObject> = emptyList<SearchQueryObject>().toMutableList()
         try {
             val typeObject = object : TypeToken<User>() {}.type
@@ -98,78 +97,78 @@ class LoggedInUserHandler() {
 
     }
 
-    fun GetFirstNameCurrentUser(): String {
-        val savedUserInfo: User? = GetSavedUserInfo()
+    fun getFirstNameCurrentUser(): String {
+        val savedUserInfo: User? = getSavedUserInfo()
         if(savedUserInfo != null) return savedUserInfo.firstName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
             Locale.getDefault()) else it.toString() }
         else return ""
     }
 
-    fun GetLastNameCurrentUser(): String {
-        val savedUserInfo: User? = GetSavedUserInfo()
+    fun getLastNameCurrentUser(): String {
+        val savedUserInfo: User? = getSavedUserInfo()
         if(savedUserInfo != null) return savedUserInfo.lastName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
             Locale.getDefault()) else it.toString() }
         else return ""
     }
 
-    fun GetUserOrganisationName(): String {
-        val savedUserInfo: User? = GetSavedUserInfo()
+    fun getUserOrganisationName(): String {
+        val savedUserInfo: User? = getSavedUserInfo()
         if(savedUserInfo != null) return savedUserInfo.organization.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
             Locale.getDefault()) else it.toString() }
         else return ""
     }
 
-    fun GetFullNameCurrentUser(): String {
-        val firstName = GetFirstNameCurrentUser()
-        val lastName = GetLastNameCurrentUser()
+    fun getFullNameCurrentUser(): String {
+        val firstName = getFirstNameCurrentUser()
+        val lastName = getLastNameCurrentUser()
 
         return "$firstName $lastName"
     }
 
-    fun GetEmailCurrentUser(): String {
-        val savedUserInfo: User? = GetSavedUserInfo()
+    fun getEmailCurrentUser(): String {
+        val savedUserInfo: User? = getSavedUserInfo()
         if(savedUserInfo != null) return savedUserInfo.email
         else return ""
     }
 
-    fun GetIdCurrentUser(): String {
-        val savedUserInfo: User? = GetSavedUserInfo()
+    fun getIdCurrentUser(): String {
+        val savedUserInfo: User? = getSavedUserInfo()
         if(savedUserInfo != null) return savedUserInfo.id.toString()
         else return ""
     }
 
-    fun GetCompanyIdCurrentUser(): String {
-        val savedUserInfo: User? = GetSavedUserInfo()
+    fun getCompanyIdCurrentUser(): String {
+        val savedUserInfo: User? = getSavedUserInfo()
         if(savedUserInfo != null) return savedUserInfo.organization.id.toString()
         else return ""
     }
 
     //Why not user UserIsOfType call from the front-end is for Readability of the code
-    fun UserIsInstructor(): Boolean {
-        return UserIsOfType(UserType.Instructor)
+    fun userIsInstructor(): Boolean {
+        return userIsOfType(UserType.Instructor)
     }
 
-    fun UserIsAdmin(): Boolean {
-        return UserIsOfType(UserType.Admin)
+    fun userIsAdmin(): Boolean {
+        return userIsOfType(UserType.Admin)
     }
 
-    fun UserIsSuperAdmin(): Boolean {
-        return UserIsOfType(UserType.SuperAdmin)
+    fun userIsSuperAdmin(): Boolean {
+        return userIsOfType(UserType.SuperAdmin)
     }
 
-    private fun UserIsOfType(userType: UserType): Boolean {
-        val savedUserInfo: User? = GetSavedUserInfo()
+    private fun userIsOfType(userType: UserType): Boolean {
+        val savedUserInfo: User? = getSavedUserInfo()
         if(savedUserInfo != null) return savedUserInfo.userType == userType
         else return false
     }
 
-    fun LogOut() {
+    fun logOut() {
         //for better code readability
 
-        ResetSavedSessionData()
+        resetSavedSessionData()
     }
 
-    fun ResetSavedSessionData() {
+    fun resetSavedSessionData() {
         val emptyUserObject: User = User(
             id = -1,
             email = "",
@@ -182,15 +181,15 @@ class LoggedInUserHandler() {
             userType = UserType.Student
         )
 
-        SetCurrentlyLoggedInUserData(emptyUserObject)
-        SetGloballyAccessableAuthKey("")
+        setCurrentlyLoggedInUserData(emptyUserObject)
+        setGloballyAccessableAuthKey("")
     }
 
-    fun SetGloballyAccessableAuthKey(authKey: String) {
+    fun setGloballyAccessableAuthKey(authKey: String) {
         sharedPreferences.edit().putString("authKey", "Bearer " + authKey).apply()
     }
 
-    fun GetAuthKey(): String {
+    fun getAuthKey(): String {
         return sharedPreferences.getString("authKey", "").toString()
     }
 }

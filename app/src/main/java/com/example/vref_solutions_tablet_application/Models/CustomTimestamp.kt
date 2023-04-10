@@ -1,4 +1,4 @@
-package com.example.vref_solutions_tablet_application.Models
+package com.example.vref_solutions_tablet_application.models
 
 import java.time.LocalDateTime
 
@@ -9,7 +9,7 @@ class CustomTimestamp(
     val miliseconds: Long,
 ) {
     companion object {
-        fun GetCurrentDateAsTimestamp(): CustomTimestamp {
+        fun getCurrentDateAsTimestamp(): CustomTimestamp {
             val currentDate = LocalDateTime.now()
 
             return CustomTimestamp(
@@ -20,7 +20,7 @@ class CustomTimestamp(
             )
         }
 
-        fun CreateFromSeconds(totalSeconds: Long): CustomTimestamp {
+        fun createFromSeconds(totalSeconds: Long): CustomTimestamp {
 
             val hours = totalSeconds / 3600
             val minutes = (totalSeconds % 3600) / 60
@@ -32,7 +32,7 @@ class CustomTimestamp(
 
 
 
-    fun TargetIsWithinDesiredSecondsOfThisTimestamp(targetCustomTimestamp: CustomTimestamp, desiredSeconds: Int): Boolean {
+    fun targetIsWithinDesiredSecondsOfThisTimestamp(targetCustomTimestamp: CustomTimestamp, desiredSeconds: Int): Boolean {
 
         val totalSecondsThisTimestamp = this.toTotalSeconds()
         val totalSecondsTargetTimestamp = targetCustomTimestamp.toTotalSeconds()
@@ -57,47 +57,51 @@ class CustomTimestamp(
 
     }
 
-    fun IsBeforeTargetTimestamp(targetCustomTimestamp: CustomTimestamp): Boolean {
+    fun isBeforeTargetTimestamp(targetCustomTimestamp: CustomTimestamp): Boolean {
         return this.toTotalSeconds() < targetCustomTimestamp.toTotalSeconds()
     }
 
-    fun IsAfterTargetTimestamp(targetCustomTimestamp: CustomTimestamp): Boolean {
+    fun isAfterTargetTimestamp(targetCustomTimestamp: CustomTimestamp): Boolean {
         return this.toTotalSeconds() > targetCustomTimestamp.toTotalSeconds()
     }
 
-    fun EqualsTargetTimestamp(targetCustomTimestamp: CustomTimestamp): Boolean {
+    fun equalsTargetTimestamp(targetCustomTimestamp: CustomTimestamp): Boolean {
         return this.toTotalSeconds() == targetCustomTimestamp.toTotalSeconds()
     }
 
     fun toTotalSeconds(): Long {
-        return ((GetHours() * 3600) + (GetMinutes() * 60) + GetSeconds())
+        return ((getHours() * 3600) + (getMinutes() * 60) + getSeconds())
     }
 
-    fun GetHoursAndMinutesFormat(): String {
+    fun getHoursAndMinutesFormat(): String {
         return "${"%02d".format(hours)}:${"%02d".format(minutes)}"
     }
 
-    fun GetHoursMinutesAndSecondsFormat(): String {
+    fun getHoursMinutesAndSecondsFormat(): String {
         return "${"%02d".format(hours)}:${"%02d".format(minutes)}:${"%02d".format(seconds)}"
     }
 
-    fun GetMinutesAndSecondsFormat(): String {
+    fun getMinutesAndSecondsFormat(): String {
         return "${"%02d".format(minutes)}:${"%02d".format(seconds)}"
     }
 
-    fun GetHours(): Long {
+    @JvmName("getHours1")
+    fun getHours(): Long {
         return hours
     }
 
-    fun GetMinutes(): Long {
+    @JvmName("getMinutes1")
+    fun getMinutes(): Long {
         return minutes
     }
 
-    fun GetSeconds(): Long {
+    @JvmName("getSeconds1")
+    fun getSeconds(): Long {
         return seconds
     }
 
-    fun GetMiliseconds(): Long {
+    @JvmName("getMiliseconds1")
+    fun getMiliseconds(): Long {
         return miliseconds
     }
 }

@@ -1,4 +1,5 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
+
 
 import android.app.Application
 import androidx.compose.foundation.Image
@@ -14,23 +15,20 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.example.vref_solutions_tablet_application.Components.TextField.RegularTextFieldWithPlaceholder
-import com.example.vref_solutions_tablet_application.Components.`Text-UI`.SmallAditionalInfoText
-import com.example.vref_solutions_tablet_application.Enums.UserType
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.StylingClasses.FontSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.IconSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.PaddingStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.RoundedSizeStatic
-import com.example.vref_solutions_tablet_application.ViewModels.AdminsViewModel
+import com.example.vref_solutions_tablet_application.components.textField.RegularTextFieldWithPlaceholder
+import com.example.vref_solutions_tablet_application.components.textUI.SmallAditionalInfoText
+import com.example.vref_solutions_tablet_application.enums.UserType
+import com.example.vref_solutions_tablet_application.handlers.LoggedInUserHandler
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackgroundDarker
-import com.example.vref_solutions_tablet_application.ui.theme.PopUpBoxDarkBackground
+import com.example.vref_solutions_tablet_application.viewModels.AdminsViewModel
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.*
 
 @Composable
 fun NewOrEditUserInputComponent(viewModel: AdminsViewModel, isNewUserVariant: Boolean) {
@@ -39,49 +37,49 @@ fun NewOrEditUserInputComponent(viewModel: AdminsViewModel, isNewUserVariant: Bo
 
             Column(modifier = Modifier.weight(1f)) {
 
-                SmallAditionalInfoText(text = "Firstname", modifier = Modifier.fillMaxWidth(), textSize = FontSizeStatic.Tiny, textAlign = TextAlign.Left,
+                SmallAditionalInfoText(text = stringResource(R.string.firstname), modifier = Modifier.fillMaxWidth(), textSize = MaterialTheme.typography.h6.fontSize, textAlign = TextAlign.Left,
                     fontWeight = FontWeight.Normal)
 
 
-                Spacer(Modifier.padding(PaddingStatic.Tiny))
+                Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
                 var firstNameState = viewModel.inputFirstname.collectAsState()
 
-                RegularTextFieldWithPlaceholder(placeholderText = "First name here...",modifier = Modifier.fillMaxWidth().shadow(elevation = 12.dp), value = firstNameState,
-                    onValueChangeFun = { viewModel.SetFirstNameInput(it) }, isPasswordDisplay = false, enabled = true)
+                RegularTextFieldWithPlaceholder(placeholderText = stringResource(R.string.firstname_here) + "...",modifier = Modifier.fillMaxWidth().shadow(elevation = 12.dp), value = firstNameState,
+                    onValueChangeFun = { viewModel.setFirstNameInput(it) }, isPasswordDisplay = false, enabled = true)
 
             }
 
-            Spacer(Modifier.padding(PaddingStatic.Small))
+            Spacer(Modifier.padding(MaterialTheme.padding.small))
 
             Column(modifier = Modifier.weight(1f)) {
-                SmallAditionalInfoText(text = "Lastname", modifier = Modifier.fillMaxWidth(), textSize = FontSizeStatic.Tiny, textAlign = TextAlign.Left,
+                SmallAditionalInfoText(text = stringResource(R.string.lastname), modifier = Modifier.fillMaxWidth(), textSize = MaterialTheme.typography.h6.fontSize, textAlign = TextAlign.Left,
                     fontWeight = FontWeight.Normal)
 
-                Spacer(Modifier.padding(PaddingStatic.Tiny))
+                Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
                 //viewModel.SetLastNameInput(editUserHandler.userToEdit.lastName)
                 var lastNameState = viewModel.inputLastName.collectAsState()
 
-                RegularTextFieldWithPlaceholder(placeholderText = "Last name here...",modifier = Modifier.fillMaxWidth().shadow(elevation = 12.dp), value = lastNameState,
-                    onValueChangeFun = { viewModel.SetLastNameInput(it) }, isPasswordDisplay = false, enabled = true)
+                RegularTextFieldWithPlaceholder(placeholderText = stringResource(R.string.lastname_here) + "...",modifier = Modifier.fillMaxWidth().shadow(elevation = 12.dp), value = lastNameState,
+                    onValueChangeFun = { viewModel.setLastNameInput(it) }, isPasswordDisplay = false, enabled = true)
 
             }
 
         } // end row with firstname and lastname
 
-        Spacer(Modifier.padding(PaddingStatic.Small))
+        Spacer(Modifier.padding(MaterialTheme.padding.small))
 
-        SmallAditionalInfoText(text = "E-mail", modifier = Modifier.fillMaxWidth(), textSize = FontSizeStatic.Tiny, textAlign = TextAlign.Left,
+        SmallAditionalInfoText(text = stringResource(R.string.email), modifier = Modifier.fillMaxWidth(), textSize = MaterialTheme.typography.h6.fontSize, textAlign = TextAlign.Left,
             fontWeight = FontWeight.Normal)
 
-        Spacer(Modifier.padding(PaddingStatic.Tiny))
+        Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
         Row(modifier = Modifier.fillMaxWidth()) {
             var emailState = viewModel.inputEmail.collectAsState()
 
-            RegularTextFieldWithPlaceholder(placeholderText = "youremailhere@email.com",modifier = Modifier.fillMaxWidth().shadow(elevation = 12.dp), value = emailState,
-                onValueChangeFun = { viewModel.SetEmailInput(it) }, isPasswordDisplay = false, enabled = true)
+            RegularTextFieldWithPlaceholder(placeholderText = stringResource(R.string.email_placeholder),modifier = Modifier.fillMaxWidth().shadow(elevation = 12.dp), value = emailState,
+                onValueChangeFun = { viewModel.setEmailInput(it) }, isPasswordDisplay = false, enabled = true)
 
             //Only when editing a user the type can be set, otherwise the default is Student
             if (isNewUserVariant == false) {
@@ -89,7 +87,7 @@ fun NewOrEditUserInputComponent(viewModel: AdminsViewModel, isNewUserVariant: Bo
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .padding(PaddingStatic.Tiny)
+                        .padding(MaterialTheme.padding.tiny)
                 ) {
                     UserTypeDropDownMenu(viewModel = viewModel)
                 }
@@ -107,7 +105,7 @@ fun UserTypeDropDownMenu(viewModel: AdminsViewModel) {
 
     var userTypesList: MutableList<UserType> = UserType.values().toMutableList()
     //remove the possibility for a admin to create superadmin users.
-    if(loggedInUserHandler.UserIsAdmin()) userTypesList.remove(UserType.SuperAdmin)
+    if(loggedInUserHandler.userIsAdmin()) userTypesList.remove(UserType.SuperAdmin)
 
     var selectedUserType = viewModel.inputUserType.collectAsState()
 
@@ -117,10 +115,10 @@ fun UserTypeDropDownMenu(viewModel: AdminsViewModel) {
         Modifier
             .fillMaxWidth()
             .height(52.dp)
-            .padding(PaddingStatic.Mini)
+            .padding(MaterialTheme.padding.mini)
             .background(
                 color = PopUpBackgroundDarker,
-                shape = RoundedCornerShape(RoundedSizeStatic.Small)
+                shape = RoundedCornerShape(MaterialTheme.roundedCornerShape.small)
             )
             .onGloballyPositioned { coordinates -> textFiledSize = coordinates.size.toSize() }
             .clickable {
@@ -130,14 +128,14 @@ fun UserTypeDropDownMenu(viewModel: AdminsViewModel) {
 
         Text(text = selectedUserType.value, color = Color.White, modifier = Modifier
             .weight(2f)
-            .padding(start = PaddingStatic.Tiny),
-            fontSize = FontSizeStatic.Small)
+            .padding(start = MaterialTheme.padding.tiny),
+            fontSize = MaterialTheme.typography.h5.fontSize)
 
         Image(
             painter = painterResource(id = if(expanded) R.drawable.chevron_up else R.drawable.chevron_down),
-            contentDescription = "cross_icon",
+            contentDescription = stringResource(R.string.cd_cross_icon),
             modifier = Modifier
-                .size(IconSizeStatic.Small)
+                .size(MaterialTheme.iconSize.small)
                 .weight(1f)
         )
 
@@ -149,7 +147,7 @@ fun UserTypeDropDownMenu(viewModel: AdminsViewModel) {
         for(userType in userTypesList) {
             DropdownMenuItem(
                 onClick = {
-                    viewModel.SetUserTypeInput(userType.toString())
+                    viewModel.setUserTypeInput(userType.toString())
                     expanded = false
                 },
             ) {

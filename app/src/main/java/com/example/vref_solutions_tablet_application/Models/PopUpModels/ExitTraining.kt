@@ -1,25 +1,27 @@
-package com.example.vref_solutions_tablet_application.Models.PopUpModels
+package com.example.vref_solutions_tablet_application.models.popUpModels
 
 import android.app.Application
-import androidx.compose.ui.platform.LocalContext
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Handlers.CurrentTrainingHandler
+import com.example.vref_solutions_tablet_application.R
+import com.example.vref_solutions_tablet_application.enums.PopUpType
+import com.example.vref_solutions_tablet_application.handlers.CurrentTrainingHandler
 import com.example.vref_solutions_tablet_application.ScreenNavName
-import com.example.vref_solutions_tablet_application.ViewModels.LiveTrainingViewModel
+import com.example.vref_solutions_tablet_application.viewModels.LiveTrainingViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 class ExitTraining: BasePopUpScreen() {
 
     override val height: Dp = 440.dp
     override val width: Dp = 520.dp
-    override val title: String = "Exit training"
-    override val confirmText: String = "Exit Training"
-    override val cancelText: String = "Cancel"
+    @StringRes
+    override val title: Int = R.string.exit_training
+    @StringRes
+    override val confirmText: Int = R.string.exit_training
+    @StringRes
+    override val cancelText: Int = R.string.cancel
     override val type: PopUpType = PopUpType.EXIT_TRAINING
 
     lateinit var viewModel: LiveTrainingViewModel
@@ -37,40 +39,33 @@ class ExitTraining: BasePopUpScreen() {
         isDeleteUser = false)
     )
 
-    override fun Cancel() {
-        viewModel.ClosePopUpScreen()
+    override fun cancel() {
+        viewModel.closePopUpScreen()
     }
 
-    override fun Confirm() {
-        val currentTrainingHandler = CurrentTrainingHandler(currentContext = viewModel.context)
+    override fun confirm() {
+        val currentTrainingHandler = CurrentTrainingHandler(currentContext = viewModel.getApplication<Application>().baseContext)
         //implementation here
         if(areYouSureInfo.value.isFinishTraining) {
             //finish the training
-            viewModel.FinishCurrentTraining(context = viewModel.getApplication<Application>().baseContext)
+            viewModel.finishCurrentTraining()
         }
         else if(!areYouSureInfo.value.isDiscardTraining && !areYouSureInfo.value.isFinishTraining) {
             //navigate to main menu without finishing the current training
-
-            viewModel.NavigateToPage(ScreenNavName.MainMenu)
+            viewModel.navigateToPage(ScreenNavName.MainMenu)
 
         }
         else if(areYouSureInfo.value.isDiscardTraining){
             //discard the training and navigate to the main menu
-            viewModel.viewModelScope.launch {
-                viewModel.DeleteTraining(targetTrainingId = currentTrainingHandler.GetCurrentTrainingId(), authKey = currentTrainingHandler.GetAuthKey())
-
-                viewModel.NavigateToPage(ScreenNavName.MainMenu)
-            }
+            viewModel.launchDeleteTraining(currentTrainingHandler = currentTrainingHandler)
         }
-
-
     }
 
-    fun CloseAreYouSurePopUp() {
+    fun closeAreYouSurePopUp() {
         areYouSureScreenOpen.value = false
     }
 
-    fun SetAndDisplayAreYouSurePopUp(infoClass: AreYouSureInfo) {
+    fun setAndDisplayAreYouSurePopUp(infoClass: AreYouSureInfo) {
         areYouSureInfo.value = infoClass
         areYouSureScreenOpen.value = true
     }

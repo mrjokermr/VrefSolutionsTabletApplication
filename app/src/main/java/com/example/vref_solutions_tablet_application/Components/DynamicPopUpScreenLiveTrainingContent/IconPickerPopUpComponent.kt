@@ -1,4 +1,4 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -8,7 +8,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,22 +20,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.example.vref_solutions_tablet_application.Components.Buttons.RegularRectangleButton
-import com.example.vref_solutions_tablet_application.Enums.IconNames
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Handlers.IconDisplayHandler
+import com.example.vref_solutions_tablet_application.components.buttons.RegularRectangleButton
+import com.example.vref_solutions_tablet_application.enums.IconNames
+import com.example.vref_solutions_tablet_application.handlers.IconDisplayHandler
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.StylingClasses.FontSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.IconSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.PaddingStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.RoundedSizeStatic
-import com.example.vref_solutions_tablet_application.ViewModels.LiveTrainingViewModel
+import com.example.vref_solutions_tablet_application.viewModels.LiveTrainingViewModel
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackground
 import com.example.vref_solutions_tablet_application.ui.theme.PopUpBackgroundDarker
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.*
 
 @Composable
 fun IconPickerPopUpComponent(viewModel: LiveTrainingViewModel) {
@@ -61,19 +57,19 @@ fun IconPickerPopUpComponent(viewModel: LiveTrainingViewModel) {
                     .padding(bottom = 40.dp),backgroundColor = PopUpBackgroundDarker) {
                     Column(modifier = Modifier
                         .fillMaxSize()
-                        .padding(PaddingStatic.Tiny)) {
+                        .padding(MaterialTheme.padding.tiny)) {
                         Row(modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Icon picker", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.icon_picker), color = Color.White, fontWeight = FontWeight.Bold)
 
                             Image(
                                 painter = painterResource(id = R.drawable.x_circle_fill),
-                                contentDescription = "cross_icon",
+                                contentDescription = stringResource(R.string.cd_cross_icon),
                                 modifier = Modifier
-                                    .size(IconSizeStatic.Small)
+                                    .size(MaterialTheme.iconSize.small)
                                     .clickable {
-                                        viewModel.ToggleIconPickerPopUp(onCloseReset = true)
+                                        viewModel.toggleIconPickerPopUp(onCloseReset = true)
                                     }
                             )
                         }
@@ -83,14 +79,14 @@ fun IconPickerPopUpComponent(viewModel: LiveTrainingViewModel) {
                         Column(modifier = Modifier
                             .weight(4f)
                             .fillMaxWidth()) {
-                            Text(text = "Currently selected icon", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, color = Color.White)
+                            Text(text = stringResource(R.string.currently_selected_icon), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, color = Color.White)
 
-                            Spacer(Modifier.padding(PaddingStatic.Mini))
+                            Spacer(Modifier.padding(MaterialTheme.padding.mini))
 
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                                 Column(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(RoundedSizeStatic.Small))
+                                        .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small))
                                         .size(70.dp)
                                         .background(PopUpBackground),
                                     verticalArrangement = Arrangement.Center,
@@ -102,15 +98,15 @@ fun IconPickerPopUpComponent(viewModel: LiveTrainingViewModel) {
                                         painter = painterResource(
                                             id = if(currentlySelectedIcon.value == "")
                                                 R.drawable.fb_ico_not_found else
-                                                IconDisplayHandler.GetPainterIdForSymbolName(currentlySelectedIcon.value))
+                                                IconDisplayHandler.getPainterIdForSymbolName(currentlySelectedIcon.value))
                                                 ,
-                                        contentDescription = "event_icon",
-                                        modifier = Modifier.size(IconSizeStatic.Large)
+                                        contentDescription = stringResource(R.string.cd_event_icon),
+                                        modifier = Modifier.size(MaterialTheme.iconSize.large)
                                     )
                                 }
                             }
 
-                            Spacer(Modifier.padding(PaddingStatic.Tiny))
+                            Spacer(Modifier.padding(MaterialTheme.padding.tiny))
 
                         }
 
@@ -121,12 +117,12 @@ fun IconPickerPopUpComponent(viewModel: LiveTrainingViewModel) {
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(4),
                                 modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(PaddingStatic.Tiny),
-                                horizontalArrangement = Arrangement.spacedBy(PaddingStatic.Tiny)) {
+                                verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.tiny),
+                                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.tiny)) {
                                 var allPossibleIconNames: MutableList<String> = IconNames.values().map { it.toString() }.toMutableList()
                                 items(allPossibleIconNames.size) {
                                     val symbolName = allPossibleIconNames[it]
-                                    IconPickerItem(drawableId = IconDisplayHandler.GetPainterIdForSymbolName(symbolName), symbolName = symbolName,viewModel = viewModel)
+                                    IconPickerItem(drawableId = IconDisplayHandler.getPainterIdForSymbolName(symbolName), symbolName = symbolName,viewModel = viewModel)
                                 }
                             }
                         }
@@ -134,11 +130,11 @@ fun IconPickerPopUpComponent(viewModel: LiveTrainingViewModel) {
                         //buttons
                         Row(modifier = Modifier.weight(2f).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
 
-                            RegularRectangleButton(buttonText = "Cancel", onClick = { viewModel.ToggleIconPickerPopUp(onCloseReset = true) }, modifier = Modifier.width(100.dp),
-                                fontSize = FontSizeStatic.Small, invertedColors = true)
+                            RegularRectangleButton(buttonText = stringResource(R.string.cancel), onClick = { viewModel.toggleIconPickerPopUp(onCloseReset = true) }, modifier = Modifier.width(100.dp),
+                                fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = true)
 
-                            RegularRectangleButton(buttonText = "Confirm", onClick = { viewModel.ToggleIconPickerPopUp(onCloseReset = false) }, modifier = Modifier.width(100.dp),
-                                fontSize = FontSizeStatic.Small, invertedColors = false)
+                            RegularRectangleButton(buttonText = stringResource(R.string.confirm), onClick = { viewModel.toggleIconPickerPopUp(onCloseReset = false) }, modifier = Modifier.width(100.dp),
+                                fontSize = MaterialTheme.typography.h5.fontSize, invertedColors = false)
 
                         }
                     }
@@ -152,10 +148,10 @@ fun IconPickerPopUpComponent(viewModel: LiveTrainingViewModel) {
 @Composable
 fun IconPickerItem(drawableId: Int, symbolName: String,viewModel: LiveTrainingViewModel) {
     Card(modifier = Modifier.size(50.dp).clickable {
-        viewModel.SelectIconForEvent(symbolName)
+        viewModel.selectIconForEvent(symbolName)
     }, elevation = 8.dp) {
         Column(modifier = Modifier
-            .clip(RoundedCornerShape(RoundedSizeStatic.Small))
+            .clip(RoundedCornerShape(MaterialTheme.roundedCornerShape.small))
             .size(50.dp)
             .background(Color.White)
             , verticalArrangement = Arrangement.Center,
@@ -165,8 +161,8 @@ fun IconPickerItem(drawableId: Int, symbolName: String,viewModel: LiveTrainingVi
             Image(
                 painter = painterResource(id = drawableId),
                 colorFilter = ColorFilter.tint(Color(0xFF0d0d0d)),
-                contentDescription = "event_icon",
-                modifier = Modifier.size(IconSizeStatic.Medium)
+                contentDescription = stringResource(R.string.cd_event_icon),
+                modifier = Modifier.size(MaterialTheme.iconSize.medium)
             )
         }
     }

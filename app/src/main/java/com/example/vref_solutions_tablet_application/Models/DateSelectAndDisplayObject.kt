@@ -1,4 +1,4 @@
-package com.example.vref_solutions_tablet_application.Models
+package com.example.vref_solutions_tablet_application.models
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -15,16 +15,16 @@ class DateSelectAndDisplayObject {
     constructor(date: LocalDate,displayText: String) {
         this.date = date
         this.displayText = displayText
-        SetDateDisplay()
+        setDateDisplay()
     }
 
-    private fun SetDateDisplay() {
+    private fun setDateDisplay() {
         displayDate = if(date != LocalDate.now()) date.format(formatter) else "Today"
         displayDay = "%02d".format(date.dayOfMonth)
     }
 
-    fun SetDateDisplay(date: LocalDate) {
+    fun setDateDisplay(date: LocalDate) {
         this.date = date
-        this.SetDateDisplay()
+        this.setDateDisplay()
     }
 }

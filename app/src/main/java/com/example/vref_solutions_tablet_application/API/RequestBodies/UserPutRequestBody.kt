@@ -1,6 +1,6 @@
-package com.example.vref_solutions_tablet_application.API.RequestBodies
+package com.example.vref_solutions_tablet_application.api.requestBodies
 
-import com.example.vref_solutions_tablet_application.Enums.UserType
+import com.example.vref_solutions_tablet_application.enums.UserType
 
 data class UserPutRequestBody(
     val email: String,

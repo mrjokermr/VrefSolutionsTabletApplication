@@ -1,40 +1,37 @@
-package com.example.vref_solutions_tablet_application.Models.PopUpModels
+package com.example.vref_solutions_tablet_application.models.popUpModels
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Handlers.CurrentTrainingHandler
-import com.example.vref_solutions_tablet_application.ViewModels.LiveTrainingViewModel
-import kotlinx.coroutines.launch
+import com.example.vref_solutions_tablet_application.R
+import com.example.vref_solutions_tablet_application.enums.PopUpType
+import com.example.vref_solutions_tablet_application.viewModels.LiveTrainingViewModel
 
 class AddEvent: BasePopUpScreen() {
     override val height: Dp = 580.dp
     override val width: Dp = 620.dp
-    override val title: String = "Add new event"
-    override val confirmText: String = "Add event"
-    override val cancelText: String = "Cancel"
+    @StringRes
+    override val title: Int = R.string.add_new_event
+    @StringRes
+    override val confirmText: Int = R.string.add_event
+    @StringRes
+    override val cancelText: Int = R.string.cancel
     override val type: PopUpType = PopUpType.ADD_EVENT
 
     lateinit var viewModel: LiveTrainingViewModel
 
-    override fun Cancel() {
+    override fun cancel() {
         //clear the given input because it was cancelled
-        viewModel.SetEventTitle("")
+        viewModel.setEventTitle("")
         //viewModel.SetEventDescription("")
 
-        viewModel.ClosePopUpScreen()
+        viewModel.closePopUpScreen()
     }
 
-    override fun Confirm() {
+    override fun confirm() {
         //implementation here
-        viewModel.ClosePopUpScreen()
+        viewModel.closePopUpScreen()
 
-        val currentTrainingHandler = CurrentTrainingHandler(currentContext = viewModel.context)
-
-        viewModel.viewModelScope.launch {
-            viewModel.NewTrainingEvent(currentTrainingId = currentTrainingHandler.GetCurrentTrainingId(), authKey = currentTrainingHandler.GetAuthKey())
-        }
-
+        viewModel.launchNewTrainingEvent()
     }
 }

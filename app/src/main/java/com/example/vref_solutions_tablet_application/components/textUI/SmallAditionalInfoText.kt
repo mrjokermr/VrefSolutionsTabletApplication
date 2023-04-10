@@ -1,16 +1,13 @@
-package com.example.vref_solutions_tablet_application.Components.`Text-UI`
+package com.example.vref_solutions_tablet_application.components.textUI
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import com.example.vref_solutions_tablet_application.StylingClasses.FontSizeStatic
-import com.example.vref_solutions_tablet_application.StylingClasses.TextShadowStatic
+import com.example.vref_solutions_tablet_application.ui.theme.stylingClasses.TextShadowStatic
 
 @Composable
 fun SmallAditionalInfoText(text: String, modifier: Modifier, textSize: TextUnit, textAlign: TextAlign, fontWeight: FontWeight) {

@@ -1,8 +1,7 @@
-package com.example.vref_solutions_tablet_application.Components
+package com.example.vref_solutions_tablet_application.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -15,10 +14,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import com.example.vref_solutions_tablet_application.R
-import com.example.vref_solutions_tablet_application.StylingClasses.IconSizeStatic
 
 @Composable
 fun DynamicLoadingDisplay(loadingText: String, iconSize: Dp, textColor: Color , iconTint: Color) {
@@ -33,7 +32,7 @@ fun DynamicLoadingDisplay(loadingText: String, iconSize: Dp, textColor: Color , 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
             painter = painterResource(id = R.drawable.loading_dots_spinner),
-            contentDescription = "loading_icon",
+            contentDescription = stringResource(R.string.cd_loading_icon),
             colorFilter = ColorFilter.tint(iconTint),
             modifier = Modifier.size(iconSize).rotate(angle)
         )

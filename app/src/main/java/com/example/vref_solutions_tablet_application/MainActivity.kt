@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.vref_solutions_tablet_application.Screens.LoginScreen
 import com.example.vref_solutions_tablet_application.ui.theme.VrefSolutionsTabletApplicationTheme
 
 class MainActivity : ComponentActivity() {

@@ -1,28 +1,30 @@
-package com.example.vref_solutions_tablet_application.Models.PopUpModels
+package com.example.vref_solutions_tablet_application.models.popUpModels
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Handlers.CurrentTrainingHandler
-import com.example.vref_solutions_tablet_application.ViewModels.LiveTrainingViewModel
-import kotlinx.coroutines.launch
+import com.example.vref_solutions_tablet_application.R
+import com.example.vref_solutions_tablet_application.enums.PopUpType
+import com.example.vref_solutions_tablet_application.viewModels.LiveTrainingViewModel
 
 class PrescribedEventsDetails: BasePopUpScreen() {
     override val height: Dp = 580.dp
     override val width: Dp = 520.dp
-    override val title: String = "Prescribed events details"
-    override val confirmText: String = ""
-    override val cancelText: String = ""
+    @StringRes
+    override val title: Int = R.string.prescribed_events_details
+    @StringRes
+    override val confirmText: Int = R.string.empty_string
+    @StringRes
+    override val cancelText: Int = R.string.empty_string
     override val type: PopUpType = PopUpType.PRESCRIBED_EVENT_INFO
 
     lateinit var viewModel: LiveTrainingViewModel
 
-    override fun Cancel() {
-        viewModel.ClosePopUpScreen()
+    override fun cancel() {
+        viewModel.closePopUpScreen()
     }
 
-    override fun Confirm() {
+    override fun confirm() {
 
     }
 }

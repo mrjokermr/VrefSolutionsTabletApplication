@@ -1,7 +1,7 @@
-package com.example.vref_solutions_tablet_application.API.ResponseEntities
+package com.example.vref_solutions_tablet_application.api.responseEntities
 
-import com.example.vref_solutions_tablet_application.Enums.UserType
-import com.example.vref_solutions_tablet_application.Models.Organization
+import com.example.vref_solutions_tablet_application.enums.UserType
+import com.example.vref_solutions_tablet_application.models.Organization
 
 data class UserResponseEntity(
     val id: Long?,

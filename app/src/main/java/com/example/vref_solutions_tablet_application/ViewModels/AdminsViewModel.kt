@@ -1,48 +1,38 @@
-package com.example.vref_solutions_tablet_application.ViewModels
+package com.example.vref_solutions_tablet_application.viewModels
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.vref_solutions_tablet_application.API.APIBaseConfig
-import com.example.vref_solutions_tablet_application.API.OrganizationApi
-import com.example.vref_solutions_tablet_application.API.RequestBodies.OrganizationRequestBody
-import com.example.vref_solutions_tablet_application.API.RequestBodies.OrganizationUserIdOnlyRequestBody
-import com.example.vref_solutions_tablet_application.API.RequestBodies.UserPostRequestBody
-import com.example.vref_solutions_tablet_application.API.RequestBodies.UserPutRequestBody
-import com.example.vref_solutions_tablet_application.API.UserApi
-import com.example.vref_solutions_tablet_application.Enums.UserType
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
-import com.example.vref_solutions_tablet_application.Mappers.OrgnizationMapper
-import com.example.vref_solutions_tablet_application.Mappers.UserMapper
-import com.example.vref_solutions_tablet_application.Models.*
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.AreYouSureInfo
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.BasePopUpScreen
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.EditUser
+import com.example.vref_solutions_tablet_application.api.OrganizationApi
+import com.example.vref_solutions_tablet_application.api.requestBodies.OrganizationRequestBody
+import com.example.vref_solutions_tablet_application.api.requestBodies.OrganizationUserIdOnlyRequestBody
+import com.example.vref_solutions_tablet_application.api.requestBodies.UserPostRequestBody
+import com.example.vref_solutions_tablet_application.api.requestBodies.UserPutRequestBody
+import com.example.vref_solutions_tablet_application.api.UserApi
+import com.example.vref_solutions_tablet_application.enums.UserType
+import com.example.vref_solutions_tablet_application.handlers.LoggedInUserHandler
+import com.example.vref_solutions_tablet_application.mappers.OrgnizationMapper
+import com.example.vref_solutions_tablet_application.mappers.UserMapper
+import com.example.vref_solutions_tablet_application.models.*
+import com.example.vref_solutions_tablet_application.models.popUpModels.AreYouSureInfo
+import com.example.vref_solutions_tablet_application.models.popUpModels.BasePopUpScreen
+import com.example.vref_solutions_tablet_application.models.popUpModels.EditUser
 import com.example.vref_solutions_tablet_application.ScreenNavName
-import com.example.vref_solutions_tablet_application.`API-Retrofit`.RetrofitApiHandler
+import com.example.vref_solutions_tablet_application.apiretrofit.RetrofitApiHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
-import java.time.Duration
-import kotlin.coroutines.coroutineContext
 
 class AdminsViewModel(application: Application) : AndroidViewModel(application) {
     lateinit var navController: NavController
-    lateinit var context: Context
 
-    private val organizationApi: OrganizationApi = RetrofitApiHandler.GetOrganizationsApi()
-    private val userApi: UserApi = RetrofitApiHandler.GetUsersApi()
+    private val organizationApi: OrganizationApi = RetrofitApiHandler.getOrganizationsApi()
+    private val userApi: UserApi = RetrofitApiHandler.getUsersApi()
 
     //dummy info to prevent null checks
     var userToEdit: MutableState<User> = mutableStateOf(
@@ -95,15 +85,32 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
     private val selectedOrganization: MutableStateFlow<Organization?> = MutableStateFlow(null)
     val uiSelectedOrganization: StateFlow<Organization?> = selectedOrganization
 
-    fun SetAndDisplayAreYouSureInfo(_areYouSureInfo: AreYouSureInfo) {
+    fun setAndDisplayAreYouSureInfo(_areYouSureInfo: AreYouSureInfo) {
         areYouSureInfo.value = _areYouSureInfo
         areYouSureScreenIsOpen.value = true
     }
 
-    suspend fun GetAllUsersForOrganisation(authKey: String, organisationId: Long) {
+    fun launchInitialAdminScreenSetup(currentUserIsSuperAdmin: Boolean, loggedInUserHandler: LoggedInUserHandler) {
+        viewModelScope.launch {
+            if(!currentUserIsSuperAdmin) {
+                //because the user is not a super admin, the users list will be prefilled and can't be selected
+                try {
+                    getAllUsersForOrganisation(authKey = loggedInUserHandler.getAuthKey(), organisationId = loggedInUserHandler.getCompanyIdCurrentUser().toLong())
+                }
+                catch(e: Throwable) {
+                    Toast.makeText(getApplication<Application>().baseContext,"Couldn't load the users for your organisation, try again later.", Toast.LENGTH_LONG).show()
+                }
+            }
+            else {
+                getAllOrganisationsInfo(authKey = loggedInUserHandler.getAuthKey())
+            }
+        }
+    }
+
+    suspend fun getAllUsersForOrganisation(authKey: String, organisationId: Long) {
         try {
             //the result of the call will contain a list of all users from that organisation
-            val result = organizationApi.GetAllOrganisationInfo(authToken = authKey, organizationId = organisationId)
+            val result = organizationApi.getAllOrganisationInfo(authToken = authKey, organizationId = organisationId)
             val responseCode = result.raw().code
             val body = result.body()
             if(body != null && responseCode >= 200 && responseCode < 300) {
@@ -133,16 +140,16 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    suspend fun GetAllOrganisationsInfo(authKey: String) {
+    suspend fun getAllOrganisationsInfo(authKey: String) {
         try {
             //the result of the call will contain a list of all users from that organisation
-            val result = organizationApi.GetOrganisationsList(authToken = authKey)
+            val result = organizationApi.getOrganisationsList(authToken = authKey)
             val responseCode = result.raw().code
             val body = result.body()
             if(body != null && responseCode >= 200 && responseCode < 300) {
                 //call was succesfull
                 Log.i("SUCCES",body.toString())
-                allOrganizationsSummary.emit(OrgnizationMapper.MapList(body)) //set the mapped retrieved data to the mutablestate organisations summary list
+                allOrganizationsSummary.emit(OrgnizationMapper.mapList(body)) //set the mapped retrieved data to the mutablestate organisations summary list
             }
             else {
                 //call failed
@@ -155,62 +162,71 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun SelectOrDeselectAndDisplayOrganisation(organization: Organization, authKey: String) {
+    fun selectOrDeselectAndDisplayOrganisation(organization: Organization, authKey: String) {
         if(selectedOrganization.value != null) {
-            if(selectedOrganization.value == organization) DeselectCurrentSelectedOrganization()
-            else SelectOrganization(organization)
+            if(selectedOrganization.value == organization) deselectCurrentSelectedOrganization()
+            else selectOrganization(organization)
         }
-        else SelectOrganization(organization)
+        else selectOrganization(organization)
 
-        SuperAdminDisplayOrganisation(authKey = authKey, organisationId = organization.id)
+        superAdminDisplayOrganisation(authKey = authKey, organisationId = organization.id)
     }
 
-    fun DeselectCurrentSelectedOrganization() {
+    fun deselectCurrentSelectedOrganization() {
         selectedOrganization.value = null
         initialOrganizationName.value = ""
         _inputOrganizationName.value = ""
     }
 
-    fun SelectOrganization(organization: Organization) {
+    fun selectOrganization(organization: Organization) {
         selectedOrganization.value = organization
         initialOrganizationName.value = organization.name
         _inputOrganizationName.value = organization.name
     }
 
-    fun SuperAdminDisplayOrganisation(authKey: String, organisationId: Long) {
+    fun superAdminDisplayOrganisation(authKey: String, organisationId: Long) {
         if(selectedOrganization.value != null) {
             viewModelScope.launch {
-                GetAllUsersForOrganisation(authKey = authKey, organisationId = organisationId)
+                getAllUsersForOrganisation(authKey = authKey, organisationId = organisationId)
             }
         }
         else viewModelScope.launch { allUsers.emit(emptyList()) }
     }
 
-    fun CancelChangingOrganizationName() {
+    fun cancelChangingOrganizationName() {
         _inputOrganizationName.value = initialOrganizationName.value
     }
 
-    suspend fun CreateNewOrganization(context: Context,authKey: String, organizationName: String) {
+    fun launchCreateNewOrganization(authKey: String, organizationName: String) {
+        viewModelScope.launch{
+            createNewOrganization(
+                authKey = authKey,
+                organizationName = organizationName
+            )
+        }
+    }
+
+    suspend fun createNewOrganization(authKey: String, organizationName: String) {
         try {
             //the result of the call will contain a list of all users from that organisation
             val requestBody = OrganizationRequestBody(name = organizationName)
 
-            val result = organizationApi.CreateNewOrganization(authToken = authKey,body = requestBody)
+            val result = organizationApi.createNewOrganization(authToken = authKey,body = requestBody)
             val responseCode = result.raw().code
             if(responseCode >= 200 && responseCode < 300) {
                 //call was succesfull
                 initialOrganizationName.value = requestBody.name
-                Toast.makeText(context,"Succesfully created a new organization", Toast.LENGTH_LONG).show()
+                Toast.makeText(getApplication<Application>().baseContext,"Succesfully created a new organization", Toast.LENGTH_LONG).show()
 
                 //force reloading the organizations summary list
                 //to force the recompesition WITH the same button state the .emit(emptyList()) is necessary aswell as changing the selectedOrganization name
                 allOrganizationsSummary.emit(emptyList())
-                GetAllOrganisationsInfo(authKey = authKey)
+                getAllOrganisationsInfo(authKey = authKey)
 
-                ToggleDynamicPopUpScreen()
+                toggleDynamicPopUpScreen()
             }
             else {
-                Toast.makeText(context,"Something went wrong when creating the the organisation. Organisation name may already be occupied or has a length longer than 50 characters.", Toast.LENGTH_LONG).show()
+                Toast.makeText(getApplication<Application>().baseContext,"Something went wrong when creating the the organisation. Organisation name may already be occupied or has a length longer than 50 characters.", Toast.LENGTH_LONG).show()
                 //call failed
                 Log.i("Error",responseCode.toString())
                 Log.i("Error","CreateNewOrganization body was null")
@@ -222,7 +238,13 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    suspend fun CreateNewUser(context: Context, authKey: String) {
+    fun launchCreateNewUser(authKey: String) {
+        viewModelScope.launch {
+            createNewUser(authKey = authKey)
+        }
+    }
+
+    suspend fun createNewUser(authKey: String) {
         try {
             if(selectedOrganization.value != null) {
                 //the result of the call will contain a list of all users from that organisation
@@ -240,21 +262,21 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
                 if(body != null && responseCode >= 200 && responseCode < 300) {
                     //call was succesfull
                     Log.i("SUCCES","CreateNewUser was succesfull")
-                    Toast.makeText(context,"Succesfully created new user: ${_inputFirstname.value} ${_inputLastName.value}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(getApplication<Application>().baseContext,"Succesfully created new user: ${_inputFirstname.value} ${_inputLastName.value}", Toast.LENGTH_LONG).show()
 
-                    val mappedUser = UserMapper.Map(entity = body).getOrNull()
+                    val mappedUser = UserMapper.map(entity = body).getOrNull()
                     if(mappedUser != null) {
                         allUsers.emit(allUsers.value.plus(mappedUser))
                     }
 
-                    ToggleDynamicPopUpScreen()
+                    toggleDynamicPopUpScreen()
                 }
                 else {
                     //409 conflict means the users email is already occupied
                     if(responseCode == 409) {
-                        Toast.makeText(context,"The users email is already in use.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(getApplication<Application>().baseContext,"The users email is already in use.", Toast.LENGTH_LONG).show()
                     }
-                    else Toast.makeText(context,"Something went wrong when creating the user, make sure the email is max 100 characters." +
+                    else Toast.makeText(getApplication<Application>().baseContext,"Something went wrong when creating the user, make sure the email is max 100 characters." +
                             " Also the firstname and lastname can't be longer than 50 characters.", Toast.LENGTH_LONG).show()
                     //call failed
                     Log.i("Error","CreateNewUser body was null or negative response code")
@@ -268,7 +290,13 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    suspend fun UpdateUser(context: Context,authKey: String) {
+    fun launchUpdateUser(authKey: String) {
+        viewModelScope.launch {
+            updateUser(authKey = authKey)
+        }
+    }
+
+    suspend fun updateUser(authKey: String) {
         try {
             if(userToEdit.value.id >= 0) {
                 //the result of the call will contain a list of all users from that organisation
@@ -287,15 +315,15 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
                 if(body != null && responseCode >= 200 && responseCode < 300) {
                     //call was succesfull
                     Log.i("SUCCES","UpdateUser was succesfull")
-                    Toast.makeText(context,"Succesfully updated user: ${_inputFirstname.value} ${_inputLastName.value}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(getApplication<Application>().baseContext,"Succesfully updated user: ${_inputFirstname.value} ${_inputLastName.value}", Toast.LENGTH_LONG).show()
 
                     allUsers.emit(emptyList()) //force reload of the users list with updated value(s)
-                    if(selectedOrganization.value != null) GetAllUsersForOrganisation(authKey = authKey, organisationId = selectedOrganization.value!!.id)
+                    if(selectedOrganization.value != null) getAllUsersForOrganisation(authKey = authKey, organisationId = selectedOrganization.value!!.id)
 
                     popUpScreenIsOpen.value = false
                 }
                 else {
-                    Toast.makeText(context,"Something went wrong when creating the user, make sure the email is max 100 characters." +
+                    Toast.makeText(getApplication<Application>().baseContext,"Something went wrong when creating the user, make sure the email is max 100 characters." +
                             " Also the firstname and lastname can't be longer than 50 characters.", Toast.LENGTH_LONG).show()
                     //call failed
                     Log.i("Error",responseCode.toString())
@@ -310,7 +338,16 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    suspend fun DeleteUser(context: Context, authKey: String) {
+    fun launchDeleteUser(authKey: String) {
+        viewModelScope.launch {
+            deleteUser(authKey = authKey)
+
+            toggleAreYouSureScreen()
+            toggleDynamicPopUpScreen()
+        }
+    }
+
+    suspend fun deleteUser(authKey: String) {
         try {
             //placeholder user is -1 ID so we can check by that value if the user is set
             if(userToEdit.value.id >= 0) {
@@ -319,23 +356,23 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
 
                 if(responseCode >= 200 && responseCode < 300) {
                     //call was successful
-                    val loggedInUserHandler = LoggedInUserHandler(context)
+                    val loggedInUserHandler = LoggedInUserHandler(getApplication<Application>().baseContext)
 
                     //user has removed him/her-self so logout
-                    if(userToEdit.value.id.toString() == loggedInUserHandler.GetIdCurrentUser()) {
-                        loggedInUserHandler.ResetSavedSessionData()
-                        NavigateToPage(ScreenNavName.Login)
+                    if(userToEdit.value.id.toString() == loggedInUserHandler.getIdCurrentUser()) {
+                        loggedInUserHandler.resetSavedSessionData()
+                        navigateToPage(ScreenNavName.Login)
                     }
                     else {
-                        Toast.makeText(context, "Succesfully deleted the user", Toast.LENGTH_LONG).show()
+                        Toast.makeText(getApplication<Application>().baseContext, "Succesfully deleted the user", Toast.LENGTH_LONG).show()
                         allUsers.emit(emptyList()) //make the user list reload
-                        if(selectedOrganization.value != null) GetAllUsersForOrganisation(authKey = authKey, organisationId = selectedOrganization.value!!.id)
+                        if(selectedOrganization.value != null) getAllUsersForOrganisation(authKey = authKey, organisationId = selectedOrganization.value!!.id)
                     }
 
                 }
                 else {
                     //call failed
-                    Toast.makeText(context, "Something went wrong while deleting the user. Note that you can't delete the last admin of the organisation.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(getApplication<Application>().baseContext, "Something went wrong while deleting the user. Note that you can't delete the last admin of the organisation.", Toast.LENGTH_LONG).show()
                     Log.i("Error","DeleteUser failed response code")
                 }
             }
@@ -347,28 +384,34 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    suspend fun ConfirmChangingOrganizationName(context: Context, authKey: String, organizationId: Long) {
+    fun launchConfirmChangingOrganizationName(authKey: String, organizationId: Long) {
+        viewModelScope.launch {
+            confirmChangingOrganizationName(authKey = authKey, organizationId = organizationId)
+        }
+    }
+
+    suspend fun confirmChangingOrganizationName(authKey: String, organizationId: Long) {
         try {
             //the result of the call will contain a list of all users from that organisation
             val requestBody = OrganizationRequestBody(name = _inputOrganizationName.value)
 
-            val result = organizationApi.UpdateOrganizationName(authToken = authKey,body = requestBody, organizationId = organizationId)
+            val result = organizationApi.updateOrganizationName(authToken = authKey,body = requestBody, organizationId = organizationId)
             val responseCode = result.raw().code
             if(responseCode >= 200 && responseCode < 300) {
                 //call was succesfull
                 Log.i("SUCCES","ConfirmChangingOrganizationName was succesfull")
                 initialOrganizationName.value = requestBody.name
-                Toast.makeText(context,"Succesfully changed the organisation name", Toast.LENGTH_LONG).show()
+                Toast.makeText(getApplication<Application>().baseContext,"Succesfully changed the organisation name", Toast.LENGTH_LONG).show()
 
                 //force reloading the organizations summary list
                 //to force the recompesition WITH the same button state the .emit(emptyList()) is necessary aswell as changing the selectedOrganization name
                 if(selectedOrganization.value != null) {selectedOrganization.value!!.name = requestBody.name}
                 allOrganizationsSummary.emit(emptyList())
-                GetAllOrganisationsInfo(authKey = authKey)
+                getAllOrganisationsInfo(authKey = authKey)
 
             }
             else {
-                Toast.makeText(context,"Organisation name is already occupied", Toast.LENGTH_LONG).show()
+                Toast.makeText(getApplication<Application>().baseContext,"Organisation name is already occupied", Toast.LENGTH_LONG).show()
                 //call failed
                 Log.i("Error","ConfirmChangingOrganizationName body was null")
             }
@@ -389,15 +432,15 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
 //        ToggleDynamicPopUpScreen()
 //    }
 
-    fun ToggleAreYouSureScreen() {
+    fun toggleAreYouSureScreen() {
         areYouSureScreenIsOpen.value = !areYouSureScreenIsOpen.value
     }
 
-    fun SetPopUpScreenType(type: BasePopUpScreen) {
+    fun setPopUpScreenType(type: BasePopUpScreen) {
         popUpScreenType.value = type
     }
 
-    fun ToggleDynamicPopUpScreen() {
+    fun toggleDynamicPopUpScreen() {
         if(userToEdit.value.id >= 0) {
             _inputFirstname.value = userToEdit.value.firstName
             _inputLastName.value = userToEdit.value.lastName
@@ -410,7 +453,7 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
         areYouSureScreenIsOpen.value = false
     }
 
-    fun ResetUserToEdit() {
+    fun resetUserToEdit() {
         //code is based of the id, if id is less then 0, value is equal to null
         userToEdit.value = User(
             id = -1,
@@ -428,32 +471,30 @@ class AdminsViewModel(application: Application) : AndroidViewModel(application) 
 
     }
 
-    fun SetFirstNameInput(value: String) {
+    fun setFirstNameInput(value: String) {
         _inputFirstname.value = value
     }
 
-    fun SetLastNameInput(value: String) {
+    fun setLastNameInput(value: String) {
         _inputLastName.value = value
     }
 
-    fun SetEmailInput(value: String) {
+    fun setEmailInput(value: String) {
         _inputEmail.value = value
     }
 
-    fun SetUserTypeInput(value: String) {
+    fun setUserTypeInput(value: String) {
         _inputUserType.value = value
     }
 
-    fun SetOrganizationNameInput(value: String, context: Context) {
+    fun setOrganizationNameInput(value: String) {
         if(value.length < 50) _inputOrganizationName.value = value
         else {
-            Toast.makeText(context, "Max character length of the organisation name has been reached.", Toast.LENGTH_LONG).show()
+            Toast.makeText(getApplication<Application>().baseContext, "Max character length of the organisation name has been reached.", Toast.LENGTH_LONG).show()
         }
-
-
     }
 
-    fun NavigateToPage(navigateTo: ScreenNavName) {
+    fun navigateToPage(navigateTo: ScreenNavName) {
         navController.navigate(route = navigateTo.route) {
             popUpTo(navigateTo.route) {
                 inclusive = true

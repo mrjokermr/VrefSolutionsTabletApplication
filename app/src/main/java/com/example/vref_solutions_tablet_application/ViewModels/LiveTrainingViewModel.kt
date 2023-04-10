@@ -1,30 +1,26 @@
-package com.example.vref_solutions_tablet_application.ViewModels
+package com.example.vref_solutions_tablet_application.viewModels
 
-import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.vref_solutions_tablet_application.API.RequestBodies.EventRequestBody
-import com.example.vref_solutions_tablet_application.API.RequestBodies.StopTrainingRequestBody
-import com.example.vref_solutions_tablet_application.API.TrainingApi
-import com.example.vref_solutions_tablet_application.API.UserApi
-import com.example.vref_solutions_tablet_application.Enums.FeedbackTarget
-import com.example.vref_solutions_tablet_application.Enums.PopUpType
-import com.example.vref_solutions_tablet_application.Handlers.CurrentTrainingHandler
-import com.example.vref_solutions_tablet_application.Handlers.LoggedInUserHandler
-import com.example.vref_solutions_tablet_application.Handlers.TimelineDisplayHandler
-import com.example.vref_solutions_tablet_application.Mappers.TrainingMapper
-import com.example.vref_solutions_tablet_application.Mappers.UserMapper
-import com.example.vref_solutions_tablet_application.Models.*
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.AddEvent
-import com.example.vref_solutions_tablet_application.Models.PopUpModels.BasePopUpScreen
+import com.example.vref_solutions_tablet_application.api.requestBodies.EventRequestBody
+import com.example.vref_solutions_tablet_application.api.requestBodies.StopTrainingRequestBody
+import com.example.vref_solutions_tablet_application.api.TrainingApi
+import com.example.vref_solutions_tablet_application.api.UserApi
+import com.example.vref_solutions_tablet_application.enums.FeedbackTarget
+import com.example.vref_solutions_tablet_application.enums.PopUpType
+import com.example.vref_solutions_tablet_application.handlers.CurrentTrainingHandler
+import com.example.vref_solutions_tablet_application.handlers.TimelineDisplayHandler
+import com.example.vref_solutions_tablet_application.mappers.TrainingMapper
+import com.example.vref_solutions_tablet_application.mappers.UserMapper
+import com.example.vref_solutions_tablet_application.models.*
+import com.example.vref_solutions_tablet_application.models.popUpModels.AddEvent
+import com.example.vref_solutions_tablet_application.models.popUpModels.BasePopUpScreen
 import com.example.vref_solutions_tablet_application.ScreenNavName
-import com.example.vref_solutions_tablet_application.`API-Retrofit`.RetrofitApiHandler
+import com.example.vref_solutions_tablet_application.apiretrofit.RetrofitApiHandler
 import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -38,8 +34,6 @@ import java.time.LocalDateTime
 
 class LiveTrainingViewModel(application: Application) : AndroidViewModel(application)  {
 
-    @SuppressLint("StaticFieldLeak")
-    lateinit var context: Context
     lateinit var scope: CoroutineScope
     lateinit var navController: NavController
 
@@ -115,29 +109,29 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
     private val _inputQuickFeedback = MutableStateFlow("")
     val inputQuickFeedback: StateFlow<String> = _inputQuickFeedback
 
-    private val trainingApi: TrainingApi = RetrofitApiHandler.GetTrainingsApi()
-    private val userApi: UserApi = RetrofitApiHandler.GetUsersApi()
+    private val trainingApi: TrainingApi = RetrofitApiHandler.getTrainingsApi()
+    private val userApi: UserApi = RetrofitApiHandler.getUsersApi()
 
-    fun InitVideoPlayers() {
-        largeVideoPlayer.value = GetNewCameraPlayer(activeLargeVideoPlayerCameraLinkObject.url)
-        smallVideoPlayer.value = GetNewCameraPlayer(activeSmallVideoPlayerCameraLinkObject.url)
+    fun initVideoPlayers() {
+        largeVideoPlayer.value = getNewCameraPlayer(activeLargeVideoPlayerCameraLinkObject.url)
+        smallVideoPlayer.value = getNewCameraPlayer(activeSmallVideoPlayerCameraLinkObject.url)
     }
 
-    fun FinishCurrentTraining(context: Context) {
+    fun finishCurrentTraining() {
         try {
-            val currentTrainingHandler: CurrentTrainingHandler = CurrentTrainingHandler(currentContext = context)
-            val currentTrainingId: Long = currentTrainingHandler.GetCurrentTrainingId().toLong()
+            val currentTrainingHandler: CurrentTrainingHandler = CurrentTrainingHandler(currentContext = getApplication<Application>().baseContext)
+            val currentTrainingId: Long = currentTrainingHandler.getCurrentTrainingId().toLong()
 
             viewModelScope.launch {
-                val result = trainingApi.StopTrainingById(trainingId = currentTrainingId,body = StopTrainingRequestBody(), authToken = currentTrainingHandler.GetAuthKey())
+                val result = trainingApi.stopTrainingById(trainingId = currentTrainingId,body = StopTrainingRequestBody(), authToken = currentTrainingHandler.getAuthKey())
                 val responseCode = result.raw().code
 
                 if(responseCode >= 200 && responseCode < 300) {
                     //call was succesfull
-                    Toast.makeText(context, "Succesfully finished the training", Toast.LENGTH_LONG).show()
-                    NavigateToPage(ScreenNavName.MainMenu)
+                    Toast.makeText(getApplication<Application>().baseContext, "Succesfully finished the training", Toast.LENGTH_LONG).show()
+                    navigateToPage(ScreenNavName.MainMenu)
                 }
-                else Toast.makeText(context, "Could not finished the training", Toast.LENGTH_LONG).show() //call failed
+                else Toast.makeText(getApplication<Application>().baseContext, "Could not finished the training", Toast.LENGTH_LONG).show() //call failed
             }
         }
         catch(e: Throwable) {
@@ -146,7 +140,15 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    suspend fun GetStudentInfo(id: Long, authKey: String, targetIsStudentOne: Boolean) {
+    fun launchLoadingOfNecessaryStartingData(currentTrainingInfoHandler: CurrentTrainingHandler) {
+        viewModelScope.launch {
+            getAllTrainingEvents(trainingId = currentTrainingInfoHandler.getCurrentTrainingId(), authKey = currentTrainingInfoHandler.getAuthKey())
+            getStudentInfo(id = currentTrainingInfoHandler.getFirstStudentId().toLong(), authKey = currentTrainingInfoHandler.getAuthKey(), targetIsStudentOne = true)
+            getStudentInfo(id = currentTrainingInfoHandler.getSecondStudentId().toLong(), authKey = currentTrainingInfoHandler.getAuthKey(), targetIsStudentOne = false)
+        }
+    }
+
+    suspend fun getStudentInfo(id: Long, authKey: String, targetIsStudentOne: Boolean) {
         try {
             //getUserById
             val result = userApi.getUserById(userId = id,authToken = authKey)
@@ -155,7 +157,7 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
             //Log.i("TEST",body?.size.toString())
 
             if(body != null && responseCode >= 200 && responseCode < 300) {
-                val mappedUser = UserMapper.Map(entity = body).getOrNull()
+                val mappedUser = UserMapper.map(entity = body).getOrNull()
                 if(mappedUser != null) {
                     //call was successful
                     if(targetIsStudentOne) studentOne.value = mappedUser
@@ -168,16 +170,16 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private suspend fun UpdateTimelineDisplayItems() {
-        if (context != null) {
-            val currentTrainingHandler = CurrentTrainingHandler(currentContext = context)
+    private suspend fun updateTimelineDisplayItems() {
+        if (getApplication<Application>().baseContext != null) {
+            val currentTrainingHandler = CurrentTrainingHandler(currentContext = getApplication<Application>().baseContext)
 
             if(allTrainingEvents.value != null) {
                 this.allTrainingTimelineDisplayItems.emit(
-                    TimelineDisplayHandler.ConvertTrainingEventsListToDisplayableTimelineEventsList(
+                    TimelineDisplayHandler.convertTrainingEventsListToDisplayableTimelineEventsList(
                         allTrainingEvents = allTrainingEvents.value!!,
-                        fromTimestamp = currentTrainingHandler.GetCurrentTrainingDateTimeAsCustomTimestamp(),
-                        untilTimestamp = CustomTimestamp.GetCurrentDateAsTimestamp()
+                        fromTimestamp = currentTrainingHandler.getCurrentTrainingDateTimeAsCustomTimestamp(),
+                        untilTimestamp = CustomTimestamp.getCurrentDateAsTimestamp()
                     )
                 )
             }
@@ -185,7 +187,7 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
 
     }
 
-    fun LocalDateTimesAreWithinGivenHoursDifference(firstDate: LocalDateTime, secondDate: LocalDateTime, maxDifferenceInHours: Int): Boolean {
+    fun localDateTimesAreWithinGivenHoursDifference(firstDate: LocalDateTime, secondDate: LocalDateTime, maxDifferenceInHours: Int): Boolean {
         val differenceInHours = Duration.between(firstDate, secondDate).toHours()
         if(differenceInHours <= maxDifferenceInHours && differenceInHours >= -maxDifferenceInHours) {
             return true
@@ -193,16 +195,22 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         else return false
     }
 
-    suspend fun GetAllTrainingEvents(trainingId: String,authKey: String) {
+    fun launchGetAllTrainingEvents(trainingId: String, authKey: String) {
+        viewModelScope.launch {
+            getAllTrainingEvents(trainingId = trainingId, authKey = authKey)
+        }
+    }
+
+    suspend fun getAllTrainingEvents(trainingId: String, authKey: String) {
         try {
-            val result = trainingApi.GetTrainingEvents(trainingId = trainingId.toLong(), authToken = authKey)
+            val result = trainingApi.getTrainingEvents(trainingId = trainingId.toLong(), authToken = authKey)
             val responseCode = result.raw().code
             val body = result.body()
 
             if(body != null && responseCode >= 200 && responseCode < 300) {
                 //call was succesfull
-                allTrainingEvents.emit(TrainingMapper.MapListTrainingEvents(body).reversed()) //to make the new training come on top
-                UpdateTimelineDisplayItems()
+                allTrainingEvents.emit(TrainingMapper.mapListTrainingEvents(body).reversed()) //to make the new training come on top
+                updateTimelineDisplayItems()
             }
 
         }
@@ -211,25 +219,32 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun NewPrescribedEvent(prescribedEvent: PrescribedEvent, currentTrainingId: String, authKey: String) {
+    fun newPrescribedEvent(prescribedEvent: PrescribedEvent, currentTrainingId: String, authKey: String) {
         //since this was an extra functionality the base NewTrainingEvent kinda doesn't support this feature.
         //but we can simply set the _inputEventTitle, symbolName and feedbackMessage and then active the NewTrainingEvent
 
         //set the devidedfeedback info
-        SetEventDescription(prescribedEvent.message)
-        SetEventTitle(prescribedEvent.title)
+        setEventDescription(prescribedEvent.message)
+        setEventTitle(prescribedEvent.title)
 
         currentlySelectedIconForEvent.value = prescribedEvent.symbolName;
         //set the icon name
         viewModelScope.launch {
-            NewTrainingEvent(currentTrainingId = currentTrainingId, authKey = authKey)
+            newTrainingEvent(currentTrainingId = currentTrainingId, authKey = authKey)
         }
 
     }
 
-    suspend fun NewTrainingEvent(currentTrainingId: String, authKey: String) {
+    fun launchNewTrainingEvent() {
+        val currentTrainingHandler = CurrentTrainingHandler(currentContext = getApplication<Application>().baseContext)
+        viewModelScope.launch {
+            newTrainingEvent(currentTrainingId = currentTrainingHandler.getCurrentTrainingId(), authKey = currentTrainingHandler.getAuthKey())
+        }
+    }
+
+    suspend fun newTrainingEvent(currentTrainingId: String, authKey: String) {
         try {
-            val devidedFeedbackMessage = TrainingEvent.GetMessageAsReadableDevidedFeedback(feedbackContainer = devidedFeedbackContainer)
+            val devidedFeedbackMessage = TrainingEvent.getMessageAsReadableDevidedFeedback(feedbackContainer = devidedFeedbackContainer)
             val title = _inputEventTitle.value
             val symbolName = if(currentlySelectedIconForEvent.value != "") {
                 //prescribed icon name is fully set in the NEwPrescribedEvent function, so it does not have  to be builded
@@ -241,11 +256,11 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
                 val requestBody: EventRequestBody = EventRequestBody(
                     name = title,
                     symbol = symbolName,
-                    timeStamp = CustomTimestamp.GetCurrentDateAsTimestamp(),
+                    timeStamp = CustomTimestamp.getCurrentDateAsTimestamp(),
                     message = devidedFeedbackMessage,
                 )
 
-                val result = trainingApi.NewTrainingEvent(trainingId = currentTrainingId, body = requestBody, authToken = authKey)
+                val result = trainingApi.newTrainingEvent(trainingId = currentTrainingId, body = requestBody, authToken = authKey)
                 val responseCode = result.raw().code
                 val body = result.body()
 
@@ -253,16 +268,16 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
                 if(body != null && responseCode >= 200 && responseCode < 300) {
                     //call was succesfull
                     //force refresh of the list
-                    Toast.makeText(context,"Your feedback has been added", Toast.LENGTH_SHORT).show()
-                    SetQuickFeedback("") //reset input field
-                    GetAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey) //load in
+                    Toast.makeText(getApplication<Application>().baseContext,"Your feedback has been added", Toast.LENGTH_SHORT).show()
+                    setQuickFeedback("") //reset input field
+                    getAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey) //load in
                 }
                 else {
-                    Toast.makeText(context,"Something went wrong serverside when creating your feedback", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(getApplication<Application>().baseContext,"Something went wrong serverside when creating your feedback", Toast.LENGTH_SHORT).show()
                 }
             }
             else {
-                Toast.makeText(context,"Your feedback message/title should at least contain 3 characters", Toast.LENGTH_SHORT).show()
+                Toast.makeText(getApplication<Application>().baseContext,"Your feedback message/title should at least contain 3 characters", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -271,9 +286,17 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    suspend fun DeleteTraining(targetTrainingId: String, authKey: String) {
+    fun launchDeleteTraining(currentTrainingHandler: CurrentTrainingHandler) {
+        viewModelScope.launch {
+            deleteTraining(targetTrainingId = currentTrainingHandler.getCurrentTrainingId(), authKey = currentTrainingHandler.getAuthKey())
+
+            navigateToPage(ScreenNavName.MainMenu)
+        }
+    }
+
+    suspend fun deleteTraining(targetTrainingId: String, authKey: String) {
         try {
-            val result = trainingApi.DeleteTraining(trainingId = targetTrainingId, authToken = authKey)
+            val result = trainingApi.deleteTraining(trainingId = targetTrainingId, authToken = authKey)
             val responseCode = result.raw().code
 
             if(responseCode >= 200 && responseCode < 300) {
@@ -287,18 +310,29 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    suspend fun DeleteTrainingEvent(currentTrainingId: String, authKey: String) {
+    fun launchDeleteTrainingEvent(currentTrainingHandler: CurrentTrainingHandler) {
+        viewModelScope.launch {
+            deleteTrainingEvent(
+                currentTrainingId = currentTrainingHandler.getCurrentTrainingId(),
+                authKey = currentTrainingHandler.getAuthKey()
+            )
+
+            togglePopUpScreen()
+        }
+    }
+
+    suspend fun deleteTrainingEvent(currentTrainingId: String, authKey: String) {
         try {
             if(eventToEdit.value != null) {
-                val result = trainingApi.DeleteTrainingEvent(trainingId = currentTrainingId, eventId = eventToEdit.value!!.id.toString(), authToken = authKey)
+                val result = trainingApi.deleteTrainingEvent(trainingId = currentTrainingId, eventId = eventToEdit.value!!.id.toString(), authToken = authKey)
                 val responseCode = result.raw().code
 
                 if(responseCode >= 200 && responseCode < 300) {
                     //call was succesfull
-                    GetAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey) //refresh the training events list
+                    getAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey) //refresh the training events list
 
                     //clear fields
-                    SetEventTitle("")
+                    setEventTitle("")
                     //SetEventDescription("")
                 }
             }
@@ -310,9 +344,23 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    suspend fun UpdateTrainingEvent(currentTrainingId: String,trainingEventId: String, authKey: String) {
+    fun launchUpdateTrainingEvent() {
+        val currentTrainingHandler: CurrentTrainingHandler = CurrentTrainingHandler(currentContext = getApplication<Application>().baseContext)
+        viewModelScope.launch {
+            if(uiEventToEdit.value != null) {
+                updateTrainingEvent(currentTrainingId = currentTrainingHandler.getCurrentTrainingId(), authKey = currentTrainingHandler.getAuthKey(),
+                    trainingEventId = uiEventToEdit.value!!.id.toString())
+
+                //clear previous input
+                setEventTitle("")
+            }
+
+        }
+    }
+
+    suspend fun updateTrainingEvent(currentTrainingId: String, trainingEventId: String, authKey: String) {
         try {
-            val devidedFeedbackMessage = TrainingEvent.GetMessageAsReadableDevidedFeedback(feedbackContainer = devidedFeedbackContainer)
+            val devidedFeedbackMessage = TrainingEvent.getMessageAsReadableDevidedFeedback(feedbackContainer = devidedFeedbackContainer)
             val title = _inputEventTitle.value
             val symbolName = if(eventToEdit.value != null) eventToEdit.value!!.symbol else "fb_manual"
 
@@ -320,24 +368,24 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
                 val requestBody: EventRequestBody = EventRequestBody(
                     name = title,
                     symbol = symbolName,
-                    timeStamp = CustomTimestamp.GetCurrentDateAsTimestamp(),
+                    timeStamp = CustomTimestamp.getCurrentDateAsTimestamp(),
                     message = devidedFeedbackMessage,
                 )
 
-                val result = trainingApi.PutTrainingEvent(trainingId = currentTrainingId,eventId = trainingEventId , body = requestBody, authToken = authKey)
+                val result = trainingApi.putTrainingEvent(trainingId = currentTrainingId,eventId = trainingEventId , body = requestBody, authToken = authKey)
                 val responseCode = result.raw().code
                 val body = result.body()
 
                 if(body != null && responseCode >= 200 && responseCode < 300) {
                     //call was succesfull
                     //force refresh of the list
-                    Toast.makeText(context,"Your feedback has been updated", Toast.LENGTH_SHORT).show()
-                    SetQuickFeedback("") //reset input field
-                    GetAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey)
+                    Toast.makeText(getApplication<Application>().baseContext,"Your feedback has been updated", Toast.LENGTH_SHORT).show()
+                    setQuickFeedback("") //reset input field
+                    getAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey)
                 }
             }
             else {
-                Toast.makeText(context,"Your feedback/title message should at least contain 3 characters", Toast.LENGTH_SHORT).show()
+                Toast.makeText(getApplication<Application>().baseContext,"Your feedback/title message should at least contain 3 characters", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -346,26 +394,32 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    suspend fun NewQuickTrainingEvent(currentTrainingId: String, message: String, authKey: String) {
+    fun launchNewQuickTrainingEvent(currentTrainingId: String, message: String, authKey: String) {
+        viewModelScope.launch {
+            newQuickTrainingEvent(currentTrainingId = currentTrainingId, message = message, authKey = authKey)
+        }
+    }
+
+    suspend fun newQuickTrainingEvent(currentTrainingId: String, message: String, authKey: String) {
         try {
             if(message.length >= 3) {
                 val requestBody: EventRequestBody = EventRequestBody(
                     name = "Quick feedback",
                     symbol = "fb_quick",
-                    timeStamp = CustomTimestamp.GetCurrentDateAsTimestamp(),
+                    timeStamp = CustomTimestamp.getCurrentDateAsTimestamp(),
                     message = message,
                 )
 
-                val result = trainingApi.NewTrainingEvent(trainingId = currentTrainingId, body = requestBody, authToken = authKey)
+                val result = trainingApi.newTrainingEvent(trainingId = currentTrainingId, body = requestBody, authToken = authKey)
                 val responseCode = result.raw().code
                 val body = result.body()
 
                 if(body != null && responseCode >= 200 && responseCode < 300) {
                     //call was succesfull
                     //force refresh of the list
-                    Toast.makeText(context,"Your quick feedback has been added", Toast.LENGTH_SHORT).show()
-                    SetQuickFeedback("") //reset input field
-                    GetAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey)
+                    Toast.makeText(getApplication<Application>().baseContext,"Your quick feedback has been added", Toast.LENGTH_SHORT).show()
+                    setQuickFeedback("") //reset input field
+                    getAllTrainingEvents(trainingId = currentTrainingId, authKey = authKey)
                 }
                 else {
                     //call failed
@@ -373,7 +427,7 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
             else {
-                Toast.makeText(context,"Your feedback message should at least contain 3 characters", Toast.LENGTH_SHORT).show()
+                Toast.makeText(getApplication<Application>().baseContext,"Your feedback message should at least contain 3 characters", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -382,26 +436,26 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun SetEventTitle(input: String) {
+    fun setEventTitle(input: String) {
         _inputEventTitle.value = input
     }
 
-    fun SetQuickFeedback(input: String) {
+    fun setQuickFeedback(input: String) {
         if(input.length < 1000) {
             _inputQuickFeedback.value = input
         }
         else {
-            if(context != null) Toast.makeText(context, "Maximum amount of characters for the event description has been reached", Toast.LENGTH_LONG).show()
+            if(getApplication<Application>().baseContext != null) Toast.makeText(getApplication<Application>().baseContext, "Maximum amount of characters for the event description has been reached", Toast.LENGTH_LONG).show()
         }
     }
 
-    fun SetFeedbackTarget(newTarget: FeedbackTarget) {
+    fun setFeedbackTarget(newTarget: FeedbackTarget) {
         feedbackTarget.value = newTarget
 
-        SwitchEventDescription()
+        switchEventDescription()
     }
 
-    fun SetEventDescription(input: String) {
+    fun setEventDescription(input: String) {
         if(input.length < 1000) {
             _inputEventDescription.value = input
 
@@ -410,70 +464,70 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
             else devidedFeedbackContainer.studentTwo = input
         }
         else {
-            if(context != null) Toast.makeText(context, "Maximum amount of characters for the event description has been reached", Toast.LENGTH_LONG).show()
+            if(getApplication<Application>().baseContext != null) Toast.makeText(getApplication<Application>().baseContext, "Maximum amount of characters for the event description has been reached", Toast.LENGTH_LONG).show()
         }
 
     }
 
-    fun SetOrResetDevidedFeedbackInfo(feedbackContainer: DevidedFeedbackContainer) {
-        SetFeedbackTarget(FeedbackTarget.Everyone)
+    fun setOrResetDevidedFeedbackInfo(feedbackContainer: DevidedFeedbackContainer) {
+        setFeedbackTarget(FeedbackTarget.Everyone)
 
         devidedFeedbackContainer = feedbackContainer
-        SetEventDescription(feedbackContainer.GetFeedbackByFeedbackTarget(FeedbackTarget.Everyone))
+        setEventDescription(feedbackContainer.getFeedbackByFeedbackTarget(FeedbackTarget.Everyone))
 
     }
 
-    private fun SetDevidedFeedbackContainerInfo(feedbackContainer: DevidedFeedbackContainer) {
+    private fun setDevidedFeedbackContainerInfo(feedbackContainer: DevidedFeedbackContainer) {
         devidedFeedbackContainer = feedbackContainer
     }
 
-    fun SwitchEventDescription() {
+    fun switchEventDescription() {
         Log.i("Values-FeedbackContainer", devidedFeedbackContainer.everyone + " , " + devidedFeedbackContainer.studentOne + " , " + devidedFeedbackContainer.studentTwo)
-        Log.i("Value-FeedbackContainer", devidedFeedbackContainer.GetFeedbackByFeedbackTarget(feedbackTarget.value))
-        _inputEventDescription.value = devidedFeedbackContainer.GetFeedbackByFeedbackTarget(feedbackTarget.value)
+        Log.i("Value-FeedbackContainer", devidedFeedbackContainer.getFeedbackByFeedbackTarget(feedbackTarget.value))
+        _inputEventDescription.value = devidedFeedbackContainer.getFeedbackByFeedbackTarget(feedbackTarget.value)
     }
 
-    fun UpdateLargeVideoDisplayCameraLinkObject(newActiveObject: CameraLinkObject) {
+    fun updateLargeVideoDisplayCameraLinkObject(newActiveObject: CameraLinkObject) {
         this.activeLargeVideoPlayerCameraLinkObject = newActiveObject
     }
 
-    fun UpdateSmallVideoDisplayCameraLinkObject(newActiveObject: CameraLinkObject) {
+    fun updateSmallVideoDisplayCameraLinkObject(newActiveObject: CameraLinkObject) {
         this.activeSmallVideoPlayerCameraLinkObject = newActiveObject
     }
 
-    fun GetLargeVideoPlayerActiveCameraLinkObject(): CameraLinkObject {
+    fun getLargeVideoPlayerActiveCameraLinkObject(): CameraLinkObject {
         return activeLargeVideoPlayerCameraLinkObject
     }
 
-    fun GetSmallVideoPlayerActiveCameraLinkObject(): CameraLinkObject {
+    fun getSmallVideoPlayerActiveCameraLinkObject(): CameraLinkObject {
         return activeSmallVideoPlayerCameraLinkObject
     }
 
-    fun ToggleOptionMenu() {
+    fun toggleOptionMenu() {
         optionMenuIsOpen.value = !optionMenuIsOpen.value
     }
 
-    fun ToggleSmallScreenFunctionTarget() {
+    fun toggleSmallScreenFunctionTarget() {
         smallLeftBoxTargetIsSmallVideoPlayer.value = !smallLeftBoxTargetIsSmallVideoPlayer.value
     }
 
 
-    fun OpenPopUpScreenEditEvent(trainingEvent: TrainingEvent, type: BasePopUpScreen) {
+    fun openPopUpScreenEditEvent(trainingEvent: TrainingEvent, type: BasePopUpScreen) {
         eventToEdit.value = trainingEvent
 
-        SelectIconForEvent(trainingEvent.symbol)
-        SetEventTitle(trainingEvent.name)
-        SetOrResetDevidedFeedbackInfo(trainingEvent.devidedFeedbackContainer)
-        OpenPopUpScreen(type)
+        selectIconForEvent(trainingEvent.symbol)
+        setEventTitle(trainingEvent.name)
+        setOrResetDevidedFeedbackInfo(trainingEvent.devidedFeedbackContainer)
+        openPopUpScreen(type)
     }
 
-    fun SelectIconForEvent(symbolName: String) {
+    fun selectIconForEvent(symbolName: String) {
         currentlySelectedIconForEvent.value = symbolName
     }
 
-    fun ToggleIconPickerPopUp(onCloseReset: Boolean) {
+    fun toggleIconPickerPopUp(onCloseReset: Boolean) {
         //user is closing icon picker and confirming his/her choice:
-        if(onCloseReset == false && eventToEdit.value != null && iconPickerIsOpen.value == true) eventToEdit.value!!.SetNewSymbolName(currentlySelectedIconForEvent.value)
+        if(onCloseReset == false && eventToEdit.value != null && iconPickerIsOpen.value == true) eventToEdit.value!!.setNewSymbolName(currentlySelectedIconForEvent.value)
 
         iconPickerIsOpen.value = !iconPickerIsOpen.value
 
@@ -481,7 +535,7 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         else if(!iconPickerIsOpen.value && onCloseReset) currentlySelectedIconForEvent.value = ""
     }
 
-    fun OpenPopUpScreen(type: BasePopUpScreen) {
+    fun openPopUpScreen(type: BasePopUpScreen) {
         optionMenuIsOpen.value = false
 
         //opens the actual dynamic pop up screen for the live training
@@ -494,23 +548,23 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
             currentlySelectedIconForEvent.value = ""
             _inputEventTitle.value = ""
             _inputEventDescription.value = ""
-            SetOrResetDevidedFeedbackInfo(feedbackContainer = DevidedFeedbackContainer())
+            setOrResetDevidedFeedbackInfo(feedbackContainer = DevidedFeedbackContainer())
         }
     }
 
-    fun ClosePopUpScreen() {
+    fun closePopUpScreen() {
         iconPickerIsOpen.value = false
         popUpScreenIsOpen.value = false
     }
 
-    fun TogglePopUpScreen() {
+    fun togglePopUpScreen() {
         popUpScreenIsOpen.value = !popUpScreenIsOpen.value
     }
 
-    fun GetNewCameraPlayer(url: String): ExoPlayer {
-        var rendersFactory = DefaultRenderersFactory(context).forceEnableMediaCodecAsynchronousQueueing() //prevents buffering memory leaks
+    fun getNewCameraPlayer(url: String): ExoPlayer {
+        var rendersFactory = DefaultRenderersFactory(getApplication<Application>().baseContext).forceEnableMediaCodecAsynchronousQueueing() //prevents buffering memory leaks
 
-        var newExoPlayer: ExoPlayer = ExoPlayer.Builder(context).setRenderersFactory(rendersFactory).build().apply {
+        var newExoPlayer: ExoPlayer = ExoPlayer.Builder(getApplication<Application>().baseContext).setRenderersFactory(rendersFactory).build().apply {
             setMediaItem(MediaItem.fromUri(url))
             repeatMode = ExoPlayer.REPEAT_MODE_ONE
             playWhenReady = true
@@ -522,7 +576,7 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         return newExoPlayer
     }
 
-    fun DisplayFullscreenVideoplayer(targetIsLargeVideoDisplay: Boolean) {
+    fun displayFullscreenVideoplayer(targetIsLargeVideoDisplay: Boolean) {
         //I have disabled fullscreen functionality because HideFullScreenVideoplayer is causing memory leaks for some reason
         //while the exoplayer does have a OnDispose function and the player gets released in HideFullScreenVideoPlayer()
 //
@@ -537,7 +591,7 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
 //        }
     }
 
-    fun HideFullScreenVideoplayer() {
+    fun hideFullScreenVideoplayer() {
         if(fullScreenVideoPlayer.value != null) {
             fullScreenVideoPlayer.value!!.stop()
             fullScreenVideoPlayer.value!!.removeMediaItems(0,1)
@@ -546,14 +600,14 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
             //fullScreenVideoPlayer.value = null
         }
 
-        ToggleFullScreenVideoDisplay()
+        toggleFullScreenVideoDisplay()
     }
 
-    fun ToggleFullScreenVideoDisplay() {
+    fun toggleFullScreenVideoDisplay() {
         //fullScreenVideoIsOpen.value = !fullScreenVideoIsOpen.value
     }
 
-    fun DoubleTapNextVideo(targetIsLargeVideoDisplay: Boolean) {
+    fun doubleTapNextVideo(targetIsLargeVideoDisplay: Boolean) {
         var videoPlayerCameraCurrentLinkObject: CameraLinkObject? = null
         if(targetIsLargeVideoDisplay) videoPlayerCameraCurrentLinkObject = activeLargeVideoPlayerCameraLinkObject
         else videoPlayerCameraCurrentLinkObject = activeSmallVideoPlayerCameraLinkObject
@@ -561,39 +615,20 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
         val currIndex = doubleTapCameraLinkOrder.indexOf(videoPlayerCameraCurrentLinkObject)
 
         if(currIndex < doubleTapCameraLinkOrder.size - 1) {
-            if(targetIsLargeVideoDisplay) SwitchLargeVideoDisplay(doubleTapCameraLinkOrder[currIndex + 1])
-            else SwitchSmallVideoDisplay(doubleTapCameraLinkOrder[currIndex + 1])
+            if(targetIsLargeVideoDisplay) switchLargeVideoDisplay(doubleTapCameraLinkOrder[currIndex + 1])
+            else switchSmallVideoDisplay(doubleTapCameraLinkOrder[currIndex + 1])
         }
         else {
-            if(targetIsLargeVideoDisplay) SwitchLargeVideoDisplay(doubleTapCameraLinkOrder[0])
-            else SwitchSmallVideoDisplay(doubleTapCameraLinkOrder[0])
+            if(targetIsLargeVideoDisplay) switchLargeVideoDisplay(doubleTapCameraLinkOrder[0])
+            else switchSmallVideoDisplay(doubleTapCameraLinkOrder[0])
         }
     }
 
-//    fun InitLargeVideoDisplay(initialCameraLinkObject: CameraLinkObject): VideoDisplayer {
-//
-//        val newLargeVideoDisplayer = VideoDisplayer(videoPlayer = GetNewCameraPlayer(initialCameraLinkObject.url), initialCameraLinkObject = initialCameraLinkObject)
-//
-//        //largeVideoDisplay = newLargeVideoDisplayer
-//        largeVideoPlayer.value = newLargeVideoDisplayer.videoPlayer
-//
-//        return newLargeVideoDisplayer
-//    }
-//
-//    fun InitSmallVideoDisplay(initialCameraLinkObject: CameraLinkObject): VideoDisplayer {
-//        val newSmallVideoDisplayer = VideoDisplayer(videoPlayer = GetNewCameraPlayer(initialCameraLinkObject.url), initialCameraLinkObject = initialCameraLinkObject)
-//        smallVideoDisplay = newSmallVideoDisplayer
-//
-//        smallVideoPlayer.value = newSmallVideoDisplayer.videoPlayer
-//
-//        return smallVideoDisplay
-//    }
-
-    fun SwitchLargeVideoDisplay(cameraLinkObject: CameraLinkObject) {
-        UpdateLargeVideoDisplayCameraLinkObject(cameraLinkObject)
+    fun switchLargeVideoDisplay(cameraLinkObject: CameraLinkObject) {
+        updateLargeVideoDisplayCameraLinkObject(cameraLinkObject)
 
         if(largeVideoPlayer.value != null) largeVideoPlayer.value!!.release()
-        largeVideoPlayer.value = GetNewCameraPlayer(cameraLinkObject.url)
+        largeVideoPlayer.value = getNewCameraPlayer(cameraLinkObject.url)
         largeVideoPlayer.value!!.prepare()
 
         //THIS WILL FORCE A RECOMPESITION OF THE LARGE VIDEO PLAYER OTHERWISE IT WOULD NEVER UPDATE
@@ -602,17 +637,17 @@ class LiveTrainingViewModel(application: Application) : AndroidViewModel(applica
 
     }
 
-    fun SwitchSmallVideoDisplay(cameraLinkObject: CameraLinkObject) {
-        UpdateSmallVideoDisplayCameraLinkObject(cameraLinkObject)
+    fun switchSmallVideoDisplay(cameraLinkObject: CameraLinkObject) {
+        updateSmallVideoDisplayCameraLinkObject(cameraLinkObject)
 
         if(smallVideoPlayer.value != null) smallVideoPlayer.value!!.release()
-        smallVideoPlayer.value = GetNewCameraPlayer(cameraLinkObject.url)
+        smallVideoPlayer.value = getNewCameraPlayer(cameraLinkObject.url)
         smallVideoPlayer.value!!.prepare()
 
         smallVideoIsChanged.value = !smallVideoIsChanged.value
     }
 
-    fun NavigateToPage(navigateTo: ScreenNavName) {
+    fun navigateToPage(navigateTo: ScreenNavName) {
 //        largeVideoDisplay.videoPlayer.release() //this is a different one then the one that is disposed on screen
 //        smallVideoDisplay.videoPlayer.release() //because these videoplayers wouldn't switch video when the video-url was updated
                                                 //but I will keep the structure inside the application when this bug with videoplayer is fixed it can be implemented with
